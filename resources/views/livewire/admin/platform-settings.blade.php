@@ -1,8 +1,10 @@
 <div class="space-y-6">
+    <x-toast :message="$statusMessage" />
+
     <header class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-1.5">
-        <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-3 py-1 text-xs font-semibold text-[#C25E38]">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
             Painel Administrativo
-        </span>
+        </p>
         <h1 class="font-serif text-2xl sm:text-3xl font-semibold text-[#2C2523]">
             Configurações Globais da Plataforma
         </h1>
@@ -11,30 +13,13 @@
         </p>
     </header>
 
-    @if ($statusMessage)
-        <div class="rounded-2xl border border-[#5A8F7B]/30 bg-[#EBF3F0] px-4 py-3 text-sm font-medium text-[#2C2523]">
-            {{ $statusMessage }}
-        </div>
-    @endif
-
     {{-- Feature Flag: Paywall Pinterest --}}
     <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="space-y-1">
-                <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="font-serif text-lg font-semibold text-[#2C2523]">
-                        Paywall das Inspirações do Pinterest
-                    </h2>
-                    @if ($paywall_pinterest_inspirations_enabled)
-                        <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-2.5 py-0.5 text-xs font-semibold text-[#C25E38]">
-                            Ativado
-                        </span>
-                    @else
-                        <span class="inline-flex items-center rounded-full bg-[#EBF3F0] px-2.5 py-0.5 text-xs font-semibold text-[#5A8F7B]">
-                            Desativado (Padrão MVP)
-                        </span>
-                    @endif
-                </div>
+                <h2 class="font-serif text-lg font-semibold text-[#2C2523]">
+                    Paywall das Inspirações do Pinterest
+                </h2>
                 <p class="text-sm text-[#6E625F]">
                     Chave liga/desliga para exigir desbloqueio pago quando Decorador, Maquiadora ou Penteadista acessam os moodboards do casal.
                 </p>

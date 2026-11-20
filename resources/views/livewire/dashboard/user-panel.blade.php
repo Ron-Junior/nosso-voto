@@ -1,19 +1,13 @@
 <div class="space-y-6">
-    @if ($statusMessage)
-        <div class="rounded-2xl border border-[#5A8F7B]/30 bg-[#EBF3F0] px-4 py-3 text-sm font-medium text-[#2C2523]">
-            {{ $statusMessage }}
-        </div>
-    @endif
+    <x-toast :message="$statusMessage" />
 
     {{-- Header / Profile Card --}}
     <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="space-y-1.5">
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-3 py-1 text-xs font-semibold text-[#C25E38]">
-                        {{ $user->roleLabel() }}
-                    </span>
-                </div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
+                    {{ $user->roleLabel() }}
+                </p>
 
                 <h1 class="font-serif text-2xl sm:text-3xl font-semibold text-[#2C2523]">
                     Olá, {{ $user->name }}
@@ -93,12 +87,20 @@
             </article>
         </section>
     @else
-        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <section class="grid gap-4 sm:grid-cols-2">
             <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Spec 02</span>
                 <h3 class="font-serif text-lg font-semibold text-[#2C2523]">Orçamento & Contratos</h3>
                 <p class="text-sm text-[#6E625F]">
                     Controle teto previsto, valor fechado, pagamentos e links de convite para cerimonialista e fornecedores.
+                </p>
+            </article>
+
+            <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Spec 09</span>
+                <h3 class="font-serif text-lg font-semibold text-[#2C2523]">Checklist do Grande Dia</h3>
+                <p class="text-sm text-[#6E625F]">
+                    Organize tudo o que precisam para o casamento e marque o que está completando e o que já têm.
                 </p>
             </article>
 
@@ -110,7 +112,7 @@
                 </p>
             </article>
 
-            <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2 sm:col-span-2 lg:col-span-1">
+            <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Spec 08</span>
                 <h3 class="font-serif text-lg font-semibold text-[#2C2523]">Lista de Presentes Pix</h3>
                 <p class="text-sm text-[#6E625F]">

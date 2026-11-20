@@ -55,6 +55,8 @@ class PlatformSettings extends Component
         $this->statusMessage = $this->paywall_pinterest_inspirations_enabled
             ? 'Paywall de inspirações do Pinterest ativado.'
             : 'Paywall de inspirações do Pinterest desativado (acesso livre no MVP).';
+
+        $this->dispatch('toast', message: $this->statusMessage);
     }
 
     public function save(): void
@@ -74,6 +76,7 @@ class PlatformSettings extends Component
         PlatformSetting::current()->update($validated);
 
         $this->statusMessage = 'Configurações globais da plataforma atualizadas com sucesso.';
+        $this->dispatch('toast', message: $this->statusMessage);
     }
 
     public function render(): View

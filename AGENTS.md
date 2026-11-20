@@ -23,6 +23,7 @@ Consulte as regras completas em [docs/DIRETRIZES_DASHBOARD.md](docs/DIRETRIZES_D
 - **Sem menções a "Plano 100% Gratuito" no Dashboard:**
   - **Não** exibir selos, badges ou textos dizendo que o plano é *"100% Gratuito"* ou *"Sem mensalidades"* dentro do dashboard/painel logado. Essa comunicação fica restrita à Landing Page e ao fluxo de cadastro.
 - **Paleta Terracota & Areia:** `#FBF9F7` (fundo), `#FFFFFF` (cards), `#EAE0DA` (bordas), `#C25E38` (primária / `#A84D2B` hover / `#F9EBE6` suave), `#2C2523` (texto / `#6E625F` secundário), `#5A8F7B` (status positivo).
+- **Feedback de Ações via Toast:** quando uma ação é concluída, exibir um **toast** flutuante temporário de confirmação, e não um badge ou alerta fixo inline.
 - **Mobile-first:** alvos de toque `min-h-[44px]`/`min-h-[48px]`, cards escaneáveis no celular em vez de tabelas largas, números financeiros com `tabular-nums`.
 
 ## Organização dos Testes e Specs

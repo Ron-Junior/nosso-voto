@@ -56,8 +56,11 @@ class PlatformSettingsTest extends TestCase
         $this->actingAs($admin);
 
         Livewire::test(PlatformSettings::class)
+            ->assertDontSee('Desativado (Padrão MVP)')
             ->call('togglePinterestPaywall')
-            ->assertSet('paywall_pinterest_inspirations_enabled', true);
+            ->assertSet('paywall_pinterest_inspirations_enabled', true)
+            ->assertDispatched('toast', message: 'Paywall de inspirações do Pinterest ativado.')
+            ->assertSeeHtml('data-toast');
 
         $this->assertTrue(PlatformSetting::current()->paywall_pinterest_inspirations_enabled);
 
@@ -71,6 +74,8 @@ class PlatformSettingsTest extends TestCase
             ->set('banner_cycle_price', '199.90')
             ->call('save')
             ->assertHasNoErrors()
+            ->assertDispatched('toast', message: 'Configurações globais da plataforma atualizadas com sucesso.')
+            ->assertSeeHtml('data-toast')
             ->assertSee('Configurações globais da plataforma atualizadas com sucesso.');
 
         $updated = PlatformSetting::current()->fresh();

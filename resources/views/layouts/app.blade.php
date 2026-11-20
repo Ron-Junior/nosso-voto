@@ -37,12 +37,10 @@
                     </a>
 
                     <div class="mb-6 rounded-2xl border border-[#EAE0DA] bg-[#FBF9F7] p-4">
-                        <div class="flex items-center justify-between gap-2 mb-1">
-                            <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-2.5 py-0.5 text-xs font-semibold text-[#C25E38]">
-                                {{ $user->roleLabel() }}
-                            </span>
-                        </div>
-                        <p class="mt-2 truncate text-sm font-semibold text-[#2C2523]">{{ $user->name }}</p>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
+                            {{ $user->roleLabel() }}
+                        </p>
+                        <p class="mt-1.5 truncate text-sm font-semibold text-[#2C2523]">{{ $user->name }}</p>
                         <p class="truncate text-xs text-[#6E625F]">{{ $user->email }}</p>
                     </div>
 
@@ -122,7 +120,7 @@
                             <div class="hidden lg:flex items-center gap-3 min-w-0">
                                 <span class="text-sm font-medium text-[#6E625F]">Conectado como</span>
                                 <span class="text-sm font-semibold text-[#2C2523] truncate">{{ $user->name }}</span>
-                                <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-2.5 py-0.5 text-xs font-semibold text-[#C25E38]">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
                                     {{ $user->roleLabel() }}
                                 </span>
                             </div>
@@ -136,7 +134,7 @@
                     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                         @if ($user)
                             <div class="flex lg:hidden items-center gap-2">
-                                <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-2.5 py-1 text-xs font-semibold text-[#C25E38]">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
                                     {{ $user->roleLabel() }}
                                 </span>
                                 <form method="POST" action="{{ route('logout') }}">
@@ -164,11 +162,7 @@
 
             {{-- Main Content --}}
             <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 pb-24 lg:pb-10">
-                @if (session('status'))
-                    <div class="mb-6 rounded-2xl border border-[#5A8F7B]/30 bg-[#EBF3F0] px-4 py-3 text-sm font-medium text-[#2C2523]">
-                        {{ session('status') }}
-                    </div>
-                @endif
+                <x-toast :message="session('status')" />
 
                 {{ $slot }}
             </main>

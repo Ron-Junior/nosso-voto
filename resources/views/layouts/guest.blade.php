@@ -56,11 +56,7 @@
     {{-- Centered Auth Content --}}
     <main class="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
         <div class="w-full max-w-xl">
-            @if (session('status'))
-                <div class="mb-6 rounded-2xl border border-[#5A8F7B]/30 bg-[#EBF3F0] px-4 py-3 text-sm font-medium text-[#2C2523]">
-                    {{ session('status') }}
-                </div>
-            @endif
+            <x-toast :message="session('status')" />
 
             {{ $slot }}
         </div>

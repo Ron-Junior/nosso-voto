@@ -22,6 +22,7 @@ class UserPanel extends Component
         $user->regenerateApiToken();
 
         $this->statusMessage = 'Novo token de integração gerado com sucesso.';
+        $this->dispatch('toast', message: $this->statusMessage);
     }
 
     public function render(): View

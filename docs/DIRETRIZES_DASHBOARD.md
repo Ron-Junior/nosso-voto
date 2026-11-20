@@ -41,6 +41,8 @@ Este documento define os padrões obrigatórios de interface, arquitetura e qual
 5. **Privacidade e Segurança entre Perfis:**
    - Cerimonialistas e profissionais convidados via `invite_token` nunca acessam dados financeiros sensíveis da carteira de presentes Pix do casal.
    - Tokens de acesso e API (`api_token`, `invite_token`) devem ser exibidos em áreas dedicadas, com ação explícita de regeneração quando aplicável.
+6. **Feedback de Ações via Toast (Sem Badges de Confirmação):**
+   - Quando o usuário completa uma ação (ex.: salvar configurações, regenerar token, cadastrar/editar fornecedor, marcar item do checklist), o sistema deve exibir um **Toast** flutuante temporário (com auto-dismiss e posicionado de forma a não obstruir a barra de navegação móvel inferior) em vez de renderizar um badge ou banner estático na página ou no card.
 
 ---
 

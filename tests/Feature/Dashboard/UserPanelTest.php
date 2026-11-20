@@ -53,6 +53,8 @@ class UserPanelTest extends TestCase
         Livewire::test(UserPanel::class)
             ->assertSee($originalToken)
             ->call('regenerateToken')
+            ->assertDispatched('toast', message: 'Novo token de integração gerado com sucesso.')
+            ->assertSeeHtml('data-toast')
             ->assertSee('Novo token de integração gerado com sucesso.');
 
         $user->refresh();
