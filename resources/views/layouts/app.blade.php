@@ -41,11 +41,6 @@
                             <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-2.5 py-0.5 text-xs font-semibold text-[#C25E38]">
                                 {{ $user->roleLabel() }}
                             </span>
-                            @if ($user->hasFreeAccess())
-                                <span class="inline-flex items-center rounded-full bg-[#EBF3F0] px-2.5 py-0.5 text-[11px] font-semibold text-[#5A8F7B]">
-                                    100% Gratuito
-                                </span>
-                            @endif
                         </div>
                         <p class="mt-2 truncate text-sm font-semibold text-[#2C2523]">{{ $user->name }}</p>
                         <p class="truncate text-xs text-[#6E625F]">{{ $user->email }}</p>
@@ -130,15 +125,10 @@
                                 <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-2.5 py-0.5 text-xs font-semibold text-[#C25E38]">
                                     {{ $user->roleLabel() }}
                                 </span>
-                                @if ($user->hasFreeAccess())
-                                    <span class="inline-flex items-center rounded-full bg-[#EBF3F0] px-2.5 py-0.5 text-xs font-semibold text-[#5A8F7B]">
-                                        Acesso 100% Gratuito
-                                    </span>
-                                @endif
                             </div>
                         @else
                             <div class="hidden lg:flex items-center gap-2 text-sm text-[#6E625F]">
-                                <span>Planejamento de casamento leve, colaborativo e gratuito para noivos</span>
+                                <span>Nosso Voto — Gestão de Casamentos</span>
                             </div>
                         @endif
                     </div>

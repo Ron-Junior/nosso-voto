@@ -95,4 +95,3 @@ class PlatformSettingsTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'admin@nossovoto.com.br', 'role' => User::ROLE_ADMIN]);
     }
 }
-

@@ -13,12 +13,6 @@
                     <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-3 py-1 text-xs font-semibold text-[#C25E38]">
                         {{ $user->roleLabel() }}
                     </span>
-
-                    @if ($user->hasFreeAccess())
-                        <span class="inline-flex items-center rounded-full bg-[#EBF3F0] px-3 py-1 text-xs font-semibold text-[#5A8F7B]">
-                            Plano Casal 100% Gratuito — Sem mensalidades
-                        </span>
-                    @endif
                 </div>
 
                 <h1 class="font-serif text-2xl sm:text-3xl font-semibold text-[#2C2523]">

@@ -24,7 +24,8 @@ class UserPanelTest extends TestCase
             ->assertSee('#C25E38')
             ->assertSee('#2C2523')
             ->assertSee('Clara & Rafael')
-            ->assertSee('Plano Casal 100% Gratuito')
+            ->assertDontSee('100% Gratuito')
+            ->assertDontSee('Sem mensalidades')
             ->assertSee('Gerar Novo Token')
             ->assertSee('lg:hidden')
             ->assertSee('hidden lg:flex')
@@ -68,4 +69,3 @@ class UserPanelTest extends TestCase
         $this->assertGreaterThanOrEqual(40, strlen($user->api_token));
     }
 }
-

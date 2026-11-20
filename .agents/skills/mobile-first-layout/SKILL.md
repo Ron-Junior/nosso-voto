@@ -34,11 +34,12 @@ Use this skill when:
    - Positive financial / gift status accent: `#5A8F7B` (sage green)
 3. **Set typography hierarchy:** Pair a classic serif (`Lora` or `Playfair Display`) for headings and couple titles with a clean sans-serif (`Plus Jakarta Sans` or `Inter`) for UI labels, navigation, and tabular financial figures.
 4. **Keep components clean and scannable:** Use rounded cards (`rounded-2xl`), generous spacing, and clear status badges instead of dense tables on mobile. Ensure interactive buttons and links have at least `44px` of touch height.
-5. **Respect role and monetization clarity in the UI:** Keep couple budgeting, supplier tracking, Pinterest board linking, and gift registry flows simple and free-feeling for couples, while clearly marking paid vendor perks (such as featured placement or unlocked Pinterest inspiration boards for decorators, makeup artists, and hair stylists) and ceremony coordinator supplier overviews.
+5. **Respect role clarity without promotional clutter in the dashboard:** Keep couple budgeting, supplier tracking, Pinterest board linking, and gift registry flows clean and focused on tasks, while clearly marking paid vendor perks (such as featured placement or unlocked Pinterest inspiration boards for decorators, makeup artists, and hair stylists) and ceremony coordinator supplier overviews. Never display promotional badges or text stating that the plan is "100% Gratuito" or "Sem mensalidades" inside the authenticated dashboard (reserve pricing/free-tier messaging for the landing page and registration screen).
 
 ## Gotchas
 
 - Avoid heavy dark backgrounds or neon accents that clash with the warm, organic wedding aesthetic.
 - Do not cram wide multi-column tables into narrow mobile viewports; stack into cards with concise labels and amounts.
 - Keep naming neutral and consistent with the wedding platform context rather than reusing unrelated project terms.
+- Do not wrap the landing page (`/`) or guest authentication pages (`/login`, `/cadastro`) in the authenticated dashboard layout, and do not add "100% Gratuito" labels inside the dashboard.
 

@@ -1,47 +1,31 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Diretrizes do Projeto — **Nosso Voto**
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Este repositório contém a plataforma **Nosso Voto** (`PHP 8.5` + `Laravel 13` + `Livewire 4` + `Tailwind CSS` + `PostgreSQL 18`).
 
-## Prerequisites
+## Ambiente 100% Docker
 
-Verify that PHP and Composer are available:
+- **Não** instalar PHP, Composer, Node ou PostgreSQL no host.
+- Executar todos os comandos de backend via container `app`:
+  - `docker compose exec -T app php artisan test`
+  - `docker compose exec -T app ./vendor/bin/pint --test`
+  - `docker compose exec -T app php artisan migrate --force`
+- Executar comandos de frontend via container `vite`:
+  - `docker compose exec -T vite npm run build`
 
-```sh
-php -v
-composer -V
-```
+## Diretrizes de Interface & Dashboard
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+Consulte as regras completas em [docs/DIRETRIZES_DASHBOARD.md](docs/DIRETRIZES_DASHBOARD.md) e na skill `.agents/skills/mobile-first-layout/SKILL.md`:
 
-macOS:
+- **Separação de Layouts:**
+  - `/` é uma Landing Page dedicada (`resources/views/welcome.blade.php`), sem estrutura de dashboard.
+  - `/login` e `/cadastro` usam `layouts::guest` (`resources/views/layouts/guest.blade.php`).
+  - Áreas logadas usam `layouts::app` (`resources/views/layouts/app.blade.php`).
+- **Sem menções a "Plano 100% Gratuito" no Dashboard:**
+  - **Não** exibir selos, badges ou textos dizendo que o plano é *"100% Gratuito"* ou *"Sem mensalidades"* dentro do dashboard/painel logado. Essa comunicação fica restrita à Landing Page e ao fluxo de cadastro.
+- **Paleta Terracota & Areia:** `#FBF9F7` (fundo), `#FFFFFF` (cards), `#EAE0DA` (bordas), `#C25E38` (primária / `#A84D2B` hover / `#F9EBE6` suave), `#2C2523` (texto / `#6E625F` secundário), `#5A8F7B` (status positivo).
+- **Mobile-first:** alvos de toque `min-h-[44px]`/`min-h-[48px]`, cards escaneáveis no celular em vez de tabelas largas, números financeiros com `tabular-nums`.
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
+## Organização dos Testes e Specs
 
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+- **Testes por Módulo:** organize testes em `tests/Feature/<Modulo>/...Test.php` (nunca crie um arquivo de teste por spec).
+- **Fluxo de Specs:** siga a ordem em `docs/specs/README.md` e mova cada spec concluída de `docs/specs/ativas/` para `docs/specs/arquivadas/`.

@@ -22,6 +22,7 @@ A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, co
 - **Diretrizes de Interface:**
   - Design limpo, acolhedor e de fácil uso.
   - **Mobile-first** (navegação por barra inferior no celular + suporte instalável via **PWA**) e **Desktop** (navegação lateral e painéis amplos).
+  - Regras completas de boas práticas do painel em [docs/DIRETRIZES_DASHBOARD.md](DIRETRIZES_DASHBOARD.md) (incluindo separação entre Landing/Guest/Dashboard e ausência de selos *"100% Gratuito"* dentro do painel logado).
 
 ---
 
