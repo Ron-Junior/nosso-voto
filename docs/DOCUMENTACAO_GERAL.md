@@ -42,6 +42,9 @@ A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, co
   - O saldo líquido fica disponível na **Carteira do Casal** no painel e é resgatado via **Chave Pix** cadastrada, evitando burocracia de abertura de subconta/KYC logo no cadastro inicial.
 
 ### 3.3. Fornecedores — Presença Gratuita + Monetização Regional Justa
+- **Áreas de Atuação (Multi-seleção no Cadastro):**
+  - Ao se cadastrar como fornecedor, o profissional **deve escolher obrigatoriamente ao menos uma área de atuação** (podendo se cadastrar em **múltiplas áreas** simultaneamente, como *Maquiagem* + *Penteado*, *Espaço* + *Buffet*, ou *Fotografia* + *Cerimonialista*).
+  - Cada área selecionada faz com que o fornecedor seja exibido na respectiva listagem filtrada por tipo/categoria de fornecedor na Vitrine e nas buscas dos noivos.
 - **Entrada Híbrida (Vitrine + Convite Viral):**
   - Fornecedores podem se cadastrar gratuitamente na Vitrine da plataforma.
   - Quando os noivos cadastram um fornecedor externo manualmente, o sistema gera um **Link de Convite exclusivo** para aquele profissional acessar o casamento — trazendo novos fornecedores organicamente para a base.
@@ -68,7 +71,7 @@ A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, co
 | **Cerimonialista** | • **Visão Consolidada e Colaborativa:** acessa pelo link de convite a lista unificada de todos os fornecedores do casal, seus status (*Em Cotação*, *Contratado*, *Quitado*), contatos e observações, podendo **atualizar status, contatos e adicionar notas/fornecedores** para apoiar os noivos, além de acompanhar e conferir os itens da lista do grande dia junto aos noivos. |
 | **Decorador** | • Visualiza o moodboard de **Decoração** salvo pela noiva no Pinterest (respeitando autorização do casal e a feature flag global de paywall). |
 | **Maquiadora e Penteadista** | • Visualizam o moodboard de **Maquiagem** e **Penteado** salvo pela noiva no Pinterest, com observações e links originais dos pins. |
-| **Fornecedor (Portal & Agenda)** | • **Agenda de Próximos Noivos:** visualização cronológica dos próximos casamentos e eventos fechados ou em negociação (com data, nomes dos noivos, local, status e valores do contrato).<br>• **Autonomia Total de Cadastro:** mesmo que os noivos **não utilizem a plataforma**, o fornecedor pode cadastrar manualmente os dados do casal, data do casamento, cidade/local, valor fechado, valor pago e observações na sua agenda.<br>• **Portfólio Pago & Sync Instagram:** área dedicada para ativar o módulo pago de portfólio, gerenciar fotos dos trabalhos e conectar a conta do **Instagram** para sincronização automática do feed.<br>• **Vitrine & Destaques:** gestão do perfil público, contratação/ativação do **Destaque Regional** e submissão para uma das **5 vagas do Banner** do ciclo vigente (ex: 2 meses). |
+| **Fornecedor (Portal & Agenda)** | • **Áreas de Atuação no Cadastro:** seleção obrigatória de uma ou **múltiplas áreas de atuação** desde o cadastro (ex.: *Maquiagem* e *Penteado*) para exibição nas respectivas listagens por tipo de fornecedor.<br>• **Agenda de Próximos Noivos:** visualização cronológica dos próximos casamentos e eventos fechados ou em negociação (com data, nomes dos noivos, local, status e valores do contrato).<br>• **Autonomia Total de Cadastro:** mesmo que os noivos **não utilizem a plataforma**, o fornecedor pode cadastrar manualmente os dados do casal, data do casamento, cidade/local, valor fechado, valor pago e observações na sua agenda.<br>• **Portfólio Pago & Sync Instagram:** área dedicada para ativar o módulo pago de portfólio, gerenciar fotos dos trabalhos e conectar a conta do **Instagram** para sincronização automática do feed.<br>• **Vitrine & Destaques:** gestão do perfil público, contratação/ativação do **Destaque Regional** e submissão para uma das **5 vagas do Banner** do ciclo vigente (ex: 2 meses). |
 | **Admin / Plataforma** | • Painel de configuração de taxas (%), valores dos planos, duração do ciclo do banner, gestão das 5 vagas do banner e controle da **Feature Flag** de cobrança das inspirações. |
 
 ---
@@ -171,7 +174,8 @@ erDiagram
         bigint user_id FK
         string business_name
         string slug UK
-        string category
+        string category "Area principal"
+        jsonb categories "Multiplas areas de atuacao selecionadas"
         string city
         string state
         string whatsapp
@@ -312,12 +316,12 @@ A documentação foi dividida em especificações incrementais dentro de `docs/s
 - **[Spec 01 — Autenticação, Perfis e Design System](specs/arquivadas/01-autenticacao-perfis-e-design-system.md):** `users`, `platform_settings` (feature flags) e layout base mobile-first + desktop.
 - **[Spec 02 — Noivos: Orçamento e Contratos Autônomos](specs/arquivadas/02-noivos-orcamento-e-contratos-autonomos.md):** `weddings`, `wedding_vendors` (visão do casal sem depender do fornecedor) e geração de `invite_token`.
 - **[Spec 03 — Cerimonialista: Visão Consolidada e Colaborativa](specs/arquivadas/03-cerimonialista-visao-consolidada-colaborativa.md):** painel consolidado de fornecedores do casamento e edição colaborativa.
+- **[Spec 04 — Fornecedor: Agenda e Noivos Autônomos](specs/arquivadas/04-fornecedor-agenda-e-noivos-autonomos.md):** `vendor_profiles`, Agenda de Próximos Noivos e cadastro autônomo de casamentos externos pelo fornecedor.
 
 ### Specs Ativas (Implementação Gradual)
-1. **[Spec 04 — Fornecedor: Agenda e Noivos Autônomos](specs/ativas/04-fornecedor-agenda-e-noivos-autonomos.md):** `vendor_profiles`, Agenda de Próximos Noivos e cadastro autônomo de casamentos externos pelo fornecedor.
-2. **[Spec 05 — Inspirações Pinterest: Web, Chrome e PWA](specs/ativas/05-inspiracoes-pinterest-extensao-chrome-e-pwa.md):** pastas por especialidade, Extensão Chrome MV3, PWA Share Target e feature flag de paywall.
-3. **[Spec 06 — Vitrine Regional, Destaque Randômico e Banner](specs/ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md):** busca regional randômica (`inRandomOrder()`) e ciclos de banner com limite máximo de 5 vagas.
-4. **[Spec 07 — Fornecedor: Portfólio Pago e Sync Instagram](specs/ativas/07-fornecedor-portfolio-pago-e-sync-instagram.md):** galeria paga na Vitrine com importação automática de mídias do Instagram.
-5. **[Spec 08 — Lista de Presentes, Taxas e Carteira Pix](specs/ativas/08-lista-de-presentes-taxas-e-carteira-pix.md):** página pública `/c/{slug}`, escolha de repasse/absorção de taxa e resgate via Chave Pix.
-6. **[Spec 09 — Noivos: Checklist e Lista do Grande Dia](specs/ativas/09-noivos-checklist-e-itens-do-grande-dia.md):** controle prático de itens e preparativos do casamento com marcação do que falta, do que está completando e do que os noivos já têm.
+1. **[Spec 05 — Inspirações Pinterest: Web, Chrome e PWA](specs/ativas/05-inspiracoes-pinterest-extensao-chrome-e-pwa.md):** pastas por especialidade, Extensão Chrome MV3, PWA Share Target e feature flag de paywall.
+2. **[Spec 06 — Vitrine Regional, Destaque Randômico e Banner](specs/ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md):** busca regional randômica (`inRandomOrder()`) e ciclos de banner com limite máximo de 5 vagas.
+3. **[Spec 07 — Fornecedor: Portfólio Pago e Sync Instagram](specs/ativas/07-fornecedor-portfolio-pago-e-sync-instagram.md):** galeria paga na Vitrine com importação automática de mídias do Instagram.
+4. **[Spec 08 — Lista de Presentes, Taxas e Carteira Pix](specs/ativas/08-lista-de-presentes-taxas-e-carteira-pix.md):** página pública `/c/{slug}`, escolha de repasse/absorção de taxa e resgate via Chave Pix.
+5. **[Spec 09 — Noivos: Checklist e Lista do Grande Dia](specs/ativas/09-noivos-checklist-e-itens-do-grande-dia.md):** controle prático de itens e preparativos do casamento com marcação do que falta, do que está completando e do que os noivos já têm.
 

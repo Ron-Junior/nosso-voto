@@ -5,6 +5,7 @@ use App\Livewire\Admin\PlatformSettings;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard\UserPanel;
+use App\Livewire\Vendor\VendorSchedule;
 use App\Livewire\Wedding\CoupleDashboard;
 use App\Livewire\Wedding\VendorWeddingAccess;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/painel', CoupleDashboard::class)->name('dashboard');
     Route::get('/fornecedor/painel', UserPanel::class)->name('vendor.dashboard');
+    Route::get('/fornecedor/agenda', VendorSchedule::class)->name('vendor.schedule');
 
     Route::post('/painel/api-token', function (Request $request) {
         $request->user()->regenerateApiToken();

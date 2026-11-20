@@ -71,6 +71,14 @@
                                 </svg>
                                 <span>Área do Fornecedor</span>
                             </a>
+
+                            <a href="{{ route('vendor.schedule') }}"
+                               class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 min-h-[44px] text-sm font-medium transition-colors {{ request()->routeIs('vendor.schedule') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F] hover:bg-[#FBF9F7] hover:text-[#2C2523]' }}">
+                                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
+                                <span>Agenda de Noivos</span>
+                            </a>
                         @endif
 
                         @if ($user->isAdmin())
@@ -172,7 +180,7 @@
     {{-- Mobile-first Fixed Bottom Navigation --}}
     @if ($user)
         <nav class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-[#FFFFFF] border-t border-[#EAE0DA] shadow-[0_-4px_20px_rgba(44,37,35,0.06)]" aria-label="Navegação móvel">
-            <div class="grid {{ $user->isAdmin() ? 'grid-cols-4' : 'grid-cols-3' }} gap-1 px-2 py-1.5">
+            <div class="grid {{ ($user->isAdmin() || $user->isVendor()) ? 'grid-cols-4' : 'grid-cols-3' }} gap-1 px-2 py-1.5">
                 <a href="{{ route('home') }}"
                    class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('home') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -198,6 +206,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387" />
                         </svg>
                         <span>Fornecedor</span>
+                    </a>
+                @endif
+
+                @if ($user->isVendor() && ! $user->isAdmin())
+                    <a href="{{ route('vendor.schedule') }}"
+                       class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('vendor.schedule') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                        </svg>
+                        <span>Agenda</span>
                     </a>
                 @endif
 

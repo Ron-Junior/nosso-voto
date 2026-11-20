@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\VendorProfile;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -40,5 +41,22 @@ class WeddingVendorFactory extends Factory
             'is_pinterest_authorized' => true,
             'has_paid_pinterest_unlock' => false,
         ];
+    }
+
+    public function autonomousForVendor(?VendorProfile $profile = null): static
+    {
+        return $this->state(function (array $attributes) use ($profile): array {
+            return [
+                'wedding_id' => null,
+                'vendor_profile_id' => $profile !== null ? $profile->id : VendorProfile::factory(),
+                'created_by_side' => WeddingVendor::SIDE_VENDOR,
+                'vendor_name' => $profile?->business_name ?? ($attributes['vendor_name'] ?? fake()->company()),
+                'category' => $profile?->category ?? ($attributes['category'] ?? 'fotografia'),
+                'couple_names' => fake()->firstName().' & '.fake()->firstName(),
+                'event_date' => now()->addDays(45)->toDateString(),
+                'event_city' => $profile !== null ? "{$profile->city} - {$profile->state}" : 'São Paulo - SP',
+                'event_venue' => 'Espaço Jardim '.fake()->lastName(),
+            ];
+        });
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Database\Factories\WeddingVendorFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -132,9 +133,38 @@ class WeddingVendor extends Model
         return $this->belongsTo(Wedding::class);
     }
 
+    public function vendorProfile(): BelongsTo
+    {
+        return $this->belongsTo(VendorProfile::class);
+    }
+
     public function isCerimonialista(): bool
     {
         return $this->category === 'cerimonialista';
+    }
+
+    public static function extractPhoneDigits(?string $phone): string
+    {
+        if (blank($phone)) {
+            return '';
+        }
+
+        return preg_replace('/\D+/', '', (string) $phone) ?? '';
+    }
+
+    public static function buildWhatsappUrl(?string $phone): ?string
+    {
+        $digits = self::extractPhoneDigits($phone);
+
+        if (strlen($digits) < 10) {
+            return null;
+        }
+
+        if (in_array(strlen($digits), [10, 11], true)) {
+            $digits = '55'.$digits;
+        }
+
+        return "https://wa.me/{$digits}";
     }
 
     /**
@@ -142,11 +172,7 @@ class WeddingVendor extends Model
      */
     public function phoneDigits(): string
     {
-        if (blank($this->contact_phone)) {
-            return '';
-        }
-
-        return preg_replace('/\D+/', '', (string) $this->contact_phone) ?? '';
+        return self::extractPhoneDigits($this->contact_phone);
     }
 
     /**
@@ -172,17 +198,127 @@ class WeddingVendor extends Model
      */
     public function whatsappUrl(): ?string
     {
-        $digits = $this->phoneDigits();
+        return self::buildWhatsappUrl($this->contact_phone);
+    }
 
-        if (strlen($digits) < 10) {
+    public function resolvedCoupleNames(): string
+    {
+        if (filled($this->couple_names)) {
+            return trim((string) $this->couple_names);
+        }
+
+        if ($this->wedding !== null) {
+            return $this->wedding->coupleTitle();
+        }
+
+        return 'Casal a definir';
+    }
+
+    public function resolvedEventDate(): ?CarbonInterface
+    {
+        return $this->event_date ?? $this->wedding?->wedding_date;
+    }
+
+    public function resolvedEventCity(): ?string
+    {
+        if (filled($this->event_city)) {
+            return trim((string) $this->event_city);
+        }
+
+        if ($this->wedding !== null) {
+            return trim("{$this->wedding->city} - {$this->wedding->state}");
+        }
+
+        return null;
+    }
+
+    public function resolvedEventVenue(): ?string
+    {
+        if (filled($this->event_venue)) {
+            return trim((string) $this->event_venue);
+        }
+
+        return filled($this->wedding?->venue_name)
+            ? trim((string) $this->wedding->venue_name)
+            : null;
+    }
+
+    public function daysUntilEvent(): ?int
+    {
+        $eventDate = $this->resolvedEventDate();
+
+        if ($eventDate === null) {
             return null;
         }
 
-        if (in_array(strlen($digits), [10, 11], true)) {
-            $digits = '55'.$digits;
+        return (int) now()->startOfDay()->diffInDays($eventDate->copy()->startOfDay(), false);
+    }
+
+    public function countdownLabel(): string
+    {
+        $days = $this->daysUntilEvent();
+
+        if ($days === null) {
+            return 'Data a definir';
         }
 
-        return "https://wa.me/{$digits}";
+        if ($days > 1) {
+            return "Em {$days} dias";
+        }
+
+        if ($days === 1) {
+            return 'Em 1 dia';
+        }
+
+        if ($days === 0) {
+            return 'Hoje';
+        }
+
+        $pastDays = abs($days);
+
+        return $pastDays === 1 ? 'Há 1 dia' : "Há {$pastDays} dias";
+    }
+
+    public function timelineHeadline(): string
+    {
+        $parts = [
+            $this->countdownLabel(),
+            $this->resolvedCoupleNames(),
+        ];
+
+        $city = $this->resolvedEventCity();
+
+        if (filled($city)) {
+            $parts[] = $city;
+        }
+
+        return implode(' • ', $parts);
+    }
+
+    public function isPlatformCouple(): bool
+    {
+        return $this->wedding_id !== null;
+    }
+
+    public function originLabel(): string
+    {
+        return $this->isPlatformCouple() ? 'Casal na Plataforma' : 'Cadastro Manual';
+    }
+
+    /**
+     * Link a vendor-created schedule entry to a couple's wedding without overwriting financial history.
+     */
+    public function linkToWedding(Wedding $wedding): self
+    {
+        $this->forceFill([
+            'wedding_id' => $wedding->id,
+            'couple_names' => $this->couple_names ?: $wedding->coupleTitle(),
+            'event_date' => $this->event_date ?? $wedding->wedding_date,
+            'event_city' => $this->event_city ?: trim("{$wedding->city} - {$wedding->state}"),
+            'event_venue' => $this->event_venue ?: $wedding->venue_name,
+        ])->save();
+
+        return $this->setRelation('wedding', $wedding);
     }
 
     public function categoryLabel(): string

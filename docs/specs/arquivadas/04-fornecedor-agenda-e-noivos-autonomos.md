@@ -1,6 +1,6 @@
 # Spec 04 — Fornecedor: Agenda de Próximos Noivos e Cadastro Autônomo
 
-- **Status:** Ativa
+- **Status:** Concluída (`arquivadas`)
 - **Dependências:** [02-noivos-orcamento-e-contratos-autonomos](02-noivos-orcamento-e-contratos-autonomos.md)
 
 ## 1. Objetivo
@@ -38,8 +38,8 @@ Criar o perfil do fornecedor e sua **Agenda de Próximos Noivos**, garantindo **
   - Modal *"Novo Casamento na Agenda"* para o fornecedor cadastrar noivos que não estão no sistema.
 
 ## 5. Critérios de Aceite
-- [ ] Fornecedor consegue cadastrar um casamento e dados dos noivos mesmo sem existir `Wedding` no banco (`wedding_id = null`).
-- [ ] Agenda exibe tanto casamentos vinculados a noivos da plataforma quanto casamentos cadastrados manualmente pelo fornecedor, ordenados por data mais próxima.
-- [ ] Fornecedor pode atualizar valores recebidos (`paid_amount`), status e notas na agenda.
-- [ ] Exclusão ou edição de um registro criado manualmente pelo fornecedor não exige existência de usuário casal.
+- [x] Fornecedor consegue cadastrar um casamento e dados dos noivos mesmo sem existir `Wedding` no banco (`wedding_id = null`).
+- [x] Agenda exibe tanto casamentos vinculados a noivos da plataforma quanto casamentos cadastrados manualmente pelo fornecedor, ordenados por data mais próxima.
+- [x] Fornecedor pode atualizar valores recebidos (`paid_amount`), status e notas na agenda.
+- [x] Exclusão ou edição de um registro criado manualmente pelo fornecedor não exige existência de usuário casal.
 

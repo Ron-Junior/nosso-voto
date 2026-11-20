@@ -2,31 +2,81 @@
     <x-toast :message="$statusMessage" />
 
     {{-- Header / Profile Card --}}
-    <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="space-y-1.5">
-                <p class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
-                    {{ $user->roleLabel() }}
-                </p>
+    <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div class="space-y-1.5 min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
+                        {{ $user->roleLabel() }}
+                    </p>
+                    @if ($isVendorArea && $vendorProfile !== null)
+                        <span class="text-[#EAE0DA]">•</span>
+                        <span class="inline-flex items-center rounded-lg bg-[#F9EBE6] px-2.5 py-0.5 text-xs font-semibold text-[#C25E38]">
+                            {{ $vendorProfile->categoryLabel() }}
+                        </span>
+                        <span class="text-xs text-[#6E625F]">
+                            {{ $vendorProfile->city }} - {{ $vendorProfile->state }}
+                        </span>
+                    @endif
+                </div>
 
                 <h1 class="font-serif text-2xl sm:text-3xl font-semibold text-[#2C2523]">
                     Olá, {{ $user->name }}
                 </h1>
-                <p class="text-sm text-[#6E625F]">
-                    @if ($user->isVendor())
-                        Gerencie seus próximos casamentos, vitrine regional e módulos profissionais no Nosso Voto.
-                    @else
-                        Bem-vindo ao seu espaço de planejamento de casamento no Nosso Voto.
+
+                @if ($isVendorArea && $vendorProfile !== null)
+                    <p class="text-sm text-[#6E625F]">
+                        <strong class="font-semibold text-[#2C2523]">{{ $vendorProfile->business_name }}</strong>
+                        @if (filled($vendorProfile->whatsapp))
+                            • WhatsApp: {{ $vendorProfile->whatsapp }}
+                        @endif
+                        @if (filled($vendorProfile->instagram))
+                            • {{ $vendorProfile->instagram }}
+                        @endif
+                        @if ($vendorProfile->price_from !== null)
+                            • A partir de <span class="tabular-nums font-medium text-[#2C2523]">R$ {{ number_format((float) $vendorProfile->price_from, 2, ',', '.') }}</span>
+                        @endif
+                    </p>
+                    @if (filled($vendorProfile->description))
+                        <p class="text-sm text-[#6E625F] leading-relaxed">
+                            {{ $vendorProfile->description }}
+                        </p>
                     @endif
-                </p>
+                    <p class="text-xs text-[#6E625F]">
+                        Slug público do perfil: <span class="font-mono text-[#2C2523]">/vitrine/{{ $vendorProfile->slug }}</span>
+                    </p>
+                @else
+                    <p class="text-sm text-[#6E625F]">
+                        @if ($isVendorArea)
+                            Configure seu perfil comercial, acompanhe casamentos vinculados por e-mail e gerencie seus módulos profissionais.
+                        @else
+                            Bem-vindo ao seu espaço de planejamento de casamento no Nosso Voto.
+                        @endif
+                    </p>
+                @endif
             </div>
 
-            @if ($user->isAdmin())
-                <a href="{{ route('admin.settings') }}"
-                   class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-3 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors shrink-0">
-                    Abrir Configurações Globais
-                </a>
-            @endif
+            <div class="flex flex-col sm:flex-row flex-wrap gap-2.5 shrink-0">
+                @if ($isVendorArea)
+                    <button type="button"
+                            wire:click="openProfileModal"
+                            class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">
+                        {{ $vendorProfile !== null ? 'Editar Perfil Profissional' : 'Configurar Perfil Profissional' }}
+                    </button>
+
+                    <a href="{{ route('vendor.schedule') }}"
+                       class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors">
+                        Abrir Agenda de Noivos
+                    </a>
+                @endif
+
+                @if ($user->isAdmin())
+                    <a href="{{ route('admin.settings') }}"
+                       class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors shrink-0">
+                        Abrir Configurações Globais
+                    </a>
+                @endif
+            </div>
         </div>
     </section>
 
@@ -88,10 +138,24 @@
                                 </p>
                             </div>
 
-                            <a href="{{ route('vendor.wedding.access', $linkedVendor->invite_token) }}"
-                               class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors shrink-0">
-                                {{ $linkedVendor->isCerimonialista() ? 'Abrir Painel Consolidado' : 'Acessar Casamento' }}
-                            </a>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                @if ($linkedVendor->vendor_profile_id === null)
+                                    <button type="button"
+                                            wire:click="linkEmailWeddingToAgenda({{ $linkedVendor->id }})"
+                                            class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer">
+                                        Adicionar à Agenda
+                                    </button>
+                                @elseif ($vendorProfile !== null && $linkedVendor->vendor_profile_id === $vendorProfile->id)
+                                    <span class="inline-flex items-center rounded-xl bg-[#EBF3F0] px-3 py-2 text-xs font-semibold text-[#5A8F7B]">
+                                        Na sua agenda
+                                    </span>
+                                @endif
+
+                                <a href="{{ route('vendor.wedding.access', $linkedVendor->invite_token) }}"
+                                   class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors shrink-0">
+                                    {{ $linkedVendor->isCerimonialista() ? 'Abrir Painel Consolidado' : 'Acessar Casamento' }}
+                                </a>
+                            </div>
                         </article>
                     @endforeach
                 </div>
@@ -99,47 +163,31 @@
         </section>
     @endif
 
-    {{-- API Token Card --}}
-    <section id="api-token" class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-                <h2 class="font-serif text-lg font-semibold text-[#2C2523]">
-                    Token de Integração (Extensão Chrome & API)
-                </h2>
-                <p class="text-sm text-[#6E625F]">
-                    Utilize este token exclusivo para autenticar a extensão do Chrome e integrações externas.
-                </p>
-            </div>
-
-            <button type="button"
-                    wire:click="regenerateToken"
-                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0">
-                <span wire:loading.remove wire:target="regenerateToken">Gerar Novo Token</span>
-                <span wire:loading wire:target="regenerateToken">Gerando...</span>
-            </button>
-        </div>
-
-        <div class="rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-3 font-mono text-xs sm:text-sm text-[#2C2523] break-all select-all">
-            {{ $user->api_token }}
-        </div>
-    </section>
-
     {{-- Role Contextual Overview --}}
-    @if ($user->isVendor())
+    @if ($isVendorArea)
         <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Agenda de Próximos Noivos</span>
-                <h3 class="font-serif text-lg font-semibold text-[#2C2523]">Cadastro Autônomo</h3>
-                <p class="text-sm text-[#6E625F]">
-                    Em breve na Spec 04: controle seus contratos e datas mesmo quando os noivos ainda não usam a plataforma.
-                </p>
+            <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-3 flex flex-col justify-between">
+                <div class="space-y-1.5">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Agenda de Noivos</span>
+                    <h2 class="font-serif text-lg font-semibold text-[#2C2523] tabular-nums">
+                        {{ $scheduleSummary['upcomingCount'] }} {{ $scheduleSummary['upcomingCount'] === 1 ? 'Próximo Casamento' : 'Próximos Casamentos' }}
+                    </h2>
+                    <p class="text-sm text-[#6E625F] tabular-nums">
+                        {{ $scheduleSummary['totalEntriesCount'] }} {{ $scheduleSummary['totalEntriesCount'] === 1 ? 'contrato registrado' : 'contratos registrados' }} • R$ {{ number_format($scheduleSummary['remainingToReceive'], 2, ',', '.') }} a receber.
+                    </p>
+                </div>
+
+                <a href="{{ route('vendor.schedule') }}"
+                   class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
+                    Gerenciar na Agenda
+                </a>
             </article>
 
             <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Destaque Regional</span>
-                <h3 class="font-serif text-lg font-semibold text-[#2C2523]">
+                <h2 class="font-serif text-lg font-semibold text-[#2C2523] tabular-nums">
                     R$ {{ number_format((float) $settings->regional_highlight_monthly_price, 2, ',', '.') }}/mês
-                </h3>
+                </h2>
                 <p class="text-sm text-[#6E625F]">
                     Exibição randômica justa no topo da sua cidade/categoria (Spec 06).
                 </p>
@@ -147,10 +195,10 @@
 
             <article class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-5 space-y-2 sm:col-span-2 lg:col-span-1">
                 <span class="text-xs font-semibold uppercase tracking-wider text-[#6E625F]">Portfólio & Banner</span>
-                <h3 class="font-serif text-lg font-semibold text-[#2C2523]">
+                <h2 class="font-serif text-lg font-semibold text-[#2C2523] tabular-nums">
                     Portfólio R$ {{ number_format((float) $settings->portfolio_monthly_price, 2, ',', '.') }}/mês
-                </h3>
-                <p class="text-sm text-[#6E625F]">
+                </h2>
+                <p class="text-sm text-[#6E625F] tabular-nums">
                     Banner em ciclos de {{ $settings->banner_cycle_months }} meses (máx. {{ $settings->banner_max_slots }} vagas) por R$ {{ number_format((float) $settings->banner_cycle_price, 2, ',', '.') }}.
                 </p>
             </article>
@@ -190,5 +238,209 @@
             </article>
         </section>
     @endif
-</div>
 
+    {{-- API Token Card --}}
+    <section id="api-token" class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h2 class="font-serif text-lg font-semibold text-[#2C2523]">
+                    Token de Integração (Extensão Chrome & API)
+                </h2>
+                <p class="text-sm text-[#6E625F]">
+                    Utilize este token exclusivo para autenticar a extensão do Chrome e integrações externas.
+                </p>
+            </div>
+
+            <button type="button"
+                    wire:click="regenerateToken"
+                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0">
+                <span wire:loading.remove wire:target="regenerateToken">Gerar Novo Token</span>
+                <span wire:loading wire:target="regenerateToken">Gerando...</span>
+            </button>
+        </div>
+
+        <div class="rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-3 font-mono text-xs sm:text-sm text-[#2C2523] break-all select-all">
+            {{ $user->api_token }}
+        </div>
+    </section>
+
+    {{-- Edit Vendor Profile Modal --}}
+    @if ($showProfileModal)
+        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="vendor-profile-modal-title">
+            <div class="w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-xl space-y-5">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 id="vendor-profile-modal-title" class="font-serif text-xl font-semibold text-[#2C2523]">
+                        Perfil do Fornecedor
+                    </h2>
+                    <button type="button"
+                            wire:click="closeProfileModal"
+                            aria-label="Fechar modal"
+                            class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[#EAE0DA] text-[#6E625F] hover:text-[#2C2523] cursor-pointer">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form wire:submit="saveVendorProfile" class="space-y-4">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label for="profile_business_name" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Nome Comercial / Fantasia
+                            </label>
+                            <input id="profile_business_name"
+                                   type="text"
+                                   wire:model="business_name"
+                                   placeholder="Ex.: Ateliê Luz & Arte Fotografia"
+                                   class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                            @error('business_name')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="profile_category" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Categoria
+                            </label>
+                            <select id="profile_category"
+                                    wire:model="profile_category"
+                                    class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                                @foreach ($categoryLabels as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @error('profile_category')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="profile_whatsapp" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                WhatsApp Comercial
+                            </label>
+                            <input id="profile_whatsapp"
+                                   type="text"
+                                   wire:model="whatsapp"
+                                   placeholder="(11) 99999-8888"
+                                   class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                            @error('whatsapp')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="profile_state" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Estado (UF)
+                            </label>
+                            <select id="profile_state"
+                                    wire:model.live="state"
+                                    class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                                <option value="">Selecione o estado</option>
+                                @foreach ($states as $uf => $stateName)
+                                    <option value="{{ $uf }}">{{ $uf }} — {{ $stateName }}</option>
+                                @endforeach
+                            </select>
+                            @error('state')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="profile_city" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Cidade
+                            </label>
+                            <select id="profile_city"
+                                    wire:model="city"
+                                    @disabled(empty($citiesForSelectedState))
+                                    class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed">
+                                <option value="">
+                                    {{ empty($citiesForSelectedState) ? 'Selecione o estado primeiro' : 'Selecione a cidade' }}
+                                </option>
+                                @foreach ($citiesForSelectedState as $cityOption)
+                                    <option value="{{ $cityOption }}">{{ $cityOption }}</option>
+                                @endforeach
+                            </select>
+                            @error('city')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="profile_instagram" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Instagram (opcional)
+                            </label>
+                            <input id="profile_instagram"
+                                   type="text"
+                                   wire:model="instagram"
+                                   placeholder="@seuatelie"
+                                   class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                            @error('instagram')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="profile_price_from" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Pacotes a Partir de (R$, opcional)
+                            </label>
+                            <input id="profile_price_from"
+                                   type="number"
+                                   step="0.01"
+                                   min="0"
+                                   wire:model="price_from"
+                                   placeholder="3500.00"
+                                   class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm tabular-nums text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                            @error('price_from')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="profile_cover_image_url" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                URL da Imagem de Capa (opcional)
+                            </label>
+                            <input id="profile_cover_image_url"
+                                   type="url"
+                                   wire:model="cover_image_url"
+                                   placeholder="https://..."
+                                   class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                            @error('cover_image_url')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="profile_description" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                                Apresentação do Serviço (opcional)
+                            </label>
+                            <textarea id="profile_description"
+                                      rows="3"
+                                      wire:model="description"
+                                      placeholder="Descreva seu estilo de atendimento, diferenciais e região de atuação..."
+                                      class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none"></textarea>
+                            @error('description')
+                                <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
+                        <button type="button"
+                                wire:click="closeProfileModal"
+                                class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-5 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                            <span wire:loading.remove wire:target="saveVendorProfile">Salvar Perfil</span>
+                            <span wire:loading wire:target="saveVendorProfile">Salvando...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+</div>
