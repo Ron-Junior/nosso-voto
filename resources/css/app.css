@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Lora', 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
+
+    /* Paleta Terracota & Areia — Nosso Voto */
+    --color-sand-bg: #FBF9F7;
+    --color-surface: #FFFFFF;
+    --color-sand-border: #EAE0DA;
+    --color-terracotta: #C25E38;
+    --color-terracotta-hover: #A84D2B;
+    --color-terracotta-soft: #F9EBE6;
+    --color-espresso: #2C2523;
+    --color-espresso-muted: #6E625F;
+    --color-sage: #5A8F7B;
+    --color-sage-soft: #EBF3F0;
+}

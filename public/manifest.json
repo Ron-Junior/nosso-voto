@@ -1,0 +1,20 @@
+{
+  "name": "Nosso Voto — Planejamento de Casamento",
+  "short_name": "Nosso Voto",
+  "description": "Plataforma mobile-first para organizar orçamento, fornecedores, inspirações do Pinterest e lista de presentes em dinheiro.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF9F7",
+  "theme_color": "#C25E38",
+  "lang": "pt-BR",
+  "share_target": {
+    "action": "/compartilhar-pin",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
+
