@@ -132,6 +132,59 @@ class WeddingVendor extends Model
         return $this->belongsTo(Wedding::class);
     }
 
+    public function isCerimonialista(): bool
+    {
+        return $this->category === 'cerimonialista';
+    }
+
+    /**
+     * Extract only numeric digits from the vendor contact phone.
+     */
+    public function phoneDigits(): string
+    {
+        if (blank($this->contact_phone)) {
+            return '';
+        }
+
+        return preg_replace('/\D+/', '', (string) $this->contact_phone) ?? '';
+    }
+
+    /**
+     * Build a clickable tel: URI when the phone has at least 8 digits.
+     */
+    public function phoneHref(): ?string
+    {
+        $digits = $this->phoneDigits();
+
+        if (strlen($digits) < 8) {
+            return null;
+        }
+
+        if (in_array(strlen($digits), [10, 11], true)) {
+            return "tel:+55{$digits}";
+        }
+
+        return strlen($digits) >= 12 ? "tel:+{$digits}" : "tel:{$digits}";
+    }
+
+    /**
+     * Build a WhatsApp wa.me URL normalized with country code 55 for BR numbers.
+     */
+    public function whatsappUrl(): ?string
+    {
+        $digits = $this->phoneDigits();
+
+        if (strlen($digits) < 10) {
+            return null;
+        }
+
+        if (in_array(strlen($digits), [10, 11], true)) {
+            $digits = '55'.$digits;
+        }
+
+        return "https://wa.me/{$digits}";
+    }
+
     public function categoryLabel(): string
     {
         return self::categoryLabels()[$this->category] ?? ucfirst($this->category);

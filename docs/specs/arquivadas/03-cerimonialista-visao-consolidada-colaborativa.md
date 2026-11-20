@@ -1,6 +1,6 @@
 # Spec 03 — Cerimonialista: Visão Consolidada e Colaborativa
 
-- **Status:** Ativa
+- **Status:** Concluída (`arquivadas`)
 - **Dependências:** [02-noivos-orcamento-e-contratos-autonomos](02-noivos-orcamento-e-contratos-autonomos.md)
 
 ## 1. Objetivo
@@ -23,8 +23,8 @@ Permitir que o **Cerimonialista** acesse a lista consolidada de todos os fornece
   - Lista de fornecedores com edição rápida inline/modal e formulário *"Adicionar Fornecedor para o Casal"*.
 
 ## 4. Critérios de Aceite
-- [ ] Token de `category = 'cerimonialista'` abre o painel consolidado apenas daquele casamento.
-- [ ] Cerimonialista consegue atualizar status/notas de outros fornecedores do casamento e incluir um novo fornecedor.
-- [ ] Token de outra categoria (ex.: fotografia) **não** tem acesso à lista consolidada dos demais fornecedores.
-- [ ] Alterações feitas pelo cerimonialista refletem imediatamente no `/painel` dos noivos.
+- [x] Token de `category = 'cerimonialista'` abre o painel consolidado apenas daquele casamento.
+- [x] Cerimonialista consegue atualizar status/notas de outros fornecedores do casamento e incluir um novo fornecedor.
+- [x] Token de outra categoria (ex.: fotografia) **não** tem acesso à lista consolidada dos demais fornecedores.
+- [x] Alterações feitas pelo cerimonialista refletem imediatamente no `/painel` dos noivos.
 

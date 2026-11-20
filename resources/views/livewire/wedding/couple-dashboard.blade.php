@@ -400,6 +400,11 @@
                                         <span class="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusBadgeClasses }}">
                                             {{ $vendor->statusLabel() }}
                                         </span>
+                                        @if ($vendor->isCerimonialista())
+                                            <span class="inline-flex items-center rounded-lg bg-[#F9EBE6] px-2.5 py-1 text-xs font-semibold text-[#C25E38]">
+                                                Visão consolidada
+                                            </span>
+                                        @endif
                                         @if ($vendor->vendor_profile_id === null)
                                             <span class="inline-flex items-center rounded-lg bg-[#FBF9F7] px-2.5 py-1 text-xs text-[#6E625F]">
                                                 Cadastro manual

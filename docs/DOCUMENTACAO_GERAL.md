@@ -311,13 +311,13 @@ A documentação foi dividida em especificações incrementais dentro de `docs/s
 - **[Spec 00 — Setup Inicial Docker & Stack](specs/arquivadas/00-setup-inicial-docker-stack.md):** Ambiente Docker com PHP 8.5, Laravel 13, Livewire 4, Tailwind (paleta Terracota & Areia), PostgreSQL 18 e PWA base.
 - **[Spec 01 — Autenticação, Perfis e Design System](specs/arquivadas/01-autenticacao-perfis-e-design-system.md):** `users`, `platform_settings` (feature flags) e layout base mobile-first + desktop.
 - **[Spec 02 — Noivos: Orçamento e Contratos Autônomos](specs/arquivadas/02-noivos-orcamento-e-contratos-autonomos.md):** `weddings`, `wedding_vendors` (visão do casal sem depender do fornecedor) e geração de `invite_token`.
+- **[Spec 03 — Cerimonialista: Visão Consolidada e Colaborativa](specs/arquivadas/03-cerimonialista-visao-consolidada-colaborativa.md):** painel consolidado de fornecedores do casamento e edição colaborativa.
 
 ### Specs Ativas (Implementação Gradual)
-1. **[Spec 03 — Cerimonialista: Visão Consolidada e Colaborativa](specs/ativas/03-cerimonialista-visao-consolidada-colaborativa.md):** painel consolidado de fornecedores do casamento e edição colaborativa.
-2. **[Spec 04 — Fornecedor: Agenda e Noivos Autônomos](specs/ativas/04-fornecedor-agenda-e-noivos-autonomos.md):** `vendor_profiles`, Agenda de Próximos Noivos e cadastro autônomo de casamentos externos pelo fornecedor.
-3. **[Spec 05 — Inspirações Pinterest: Web, Chrome e PWA](specs/ativas/05-inspiracoes-pinterest-extensao-chrome-e-pwa.md):** pastas por especialidade, Extensão Chrome MV3, PWA Share Target e feature flag de paywall.
-4. **[Spec 06 — Vitrine Regional, Destaque Randômico e Banner](specs/ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md):** busca regional randômica (`inRandomOrder()`) e ciclos de banner com limite máximo de 5 vagas.
-5. **[Spec 07 — Fornecedor: Portfólio Pago e Sync Instagram](specs/ativas/07-fornecedor-portfolio-pago-e-sync-instagram.md):** galeria paga na Vitrine com importação automática de mídias do Instagram.
-6. **[Spec 08 — Lista de Presentes, Taxas e Carteira Pix](specs/ativas/08-lista-de-presentes-taxas-e-carteira-pix.md):** página pública `/c/{slug}`, escolha de repasse/absorção de taxa e resgate via Chave Pix.
-7. **[Spec 09 — Noivos: Checklist e Lista do Grande Dia](specs/ativas/09-noivos-checklist-e-itens-do-grande-dia.md):** controle prático de itens e preparativos do casamento com marcação do que falta, do que está completando e do que os noivos já têm.
+1. **[Spec 04 — Fornecedor: Agenda e Noivos Autônomos](specs/ativas/04-fornecedor-agenda-e-noivos-autonomos.md):** `vendor_profiles`, Agenda de Próximos Noivos e cadastro autônomo de casamentos externos pelo fornecedor.
+2. **[Spec 05 — Inspirações Pinterest: Web, Chrome e PWA](specs/ativas/05-inspiracoes-pinterest-extensao-chrome-e-pwa.md):** pastas por especialidade, Extensão Chrome MV3, PWA Share Target e feature flag de paywall.
+3. **[Spec 06 — Vitrine Regional, Destaque Randômico e Banner](specs/ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md):** busca regional randômica (`inRandomOrder()`) e ciclos de banner com limite máximo de 5 vagas.
+4. **[Spec 07 — Fornecedor: Portfólio Pago e Sync Instagram](specs/ativas/07-fornecedor-portfolio-pago-e-sync-instagram.md):** galeria paga na Vitrine com importação automática de mídias do Instagram.
+5. **[Spec 08 — Lista de Presentes, Taxas e Carteira Pix](specs/ativas/08-lista-de-presentes-taxas-e-carteira-pix.md):** página pública `/c/{slug}`, escolha de repasse/absorção de taxa e resgate via Chave Pix.
+6. **[Spec 09 — Noivos: Checklist e Lista do Grande Dia](specs/ativas/09-noivos-checklist-e-itens-do-grande-dia.md):** controle prático de itens e preparativos do casamento com marcação do que falta, do que está completando e do que os noivos já têm.
 

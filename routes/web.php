@@ -6,6 +6,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard\UserPanel;
 use App\Livewire\Wedding\CoupleDashboard;
+use App\Livewire\Wedding\VendorWeddingAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+Route::get('/acesso/profissional/{token}', VendorWeddingAccess::class)
+    ->name('vendor.wedding.access');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');

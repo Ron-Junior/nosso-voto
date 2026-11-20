@@ -21,7 +21,7 @@ Esta pasta organiza todo o escopo do **Nosso Voto** em especificações técnica
 | `00` | [Setup Inicial Docker & Stack](arquivadas/00-setup-inicial-docker-stack.md) | `arquivadas` | — | PHP 8.5, Laravel 13, Livewire 4, PostgreSQL 18, Tailwind e PWA base |
 | `01` | [Autenticação, Perfis e Design System](arquivadas/01-autenticacao-perfis-e-design-system.md) | `arquivadas` | `00` | `users`, `platform_settings`, auth multi-perfil e layout Terracota & Areia |
 | `02` | [Noivos: Orçamento e Contratos Autônomos](arquivadas/02-noivos-orcamento-e-contratos-autonomos.md) | `arquivadas` | `01` | `weddings`, `wedding_vendors` (visão casal), orçamento vs. gasto e convites |
-| `03` | [Cerimonialista: Visão Consolidada Colaborativa](ativas/03-cerimonialista-visao-consolidada-colaborativa.md) | `ativas` | `02` | Acesso por `invite_token` e colaboração nos fornecedores do casamento |
+| `03` | [Cerimonialista: Visão Consolidada Colaborativa](arquivadas/03-cerimonialista-visao-consolidada-colaborativa.md) | `arquivadas` | `02` | Acesso por `invite_token` e colaboração nos fornecedores do casamento |
 | `04` | [Fornecedor: Agenda e Noivos Autônomos](ativas/04-fornecedor-agenda-e-noivos-autonomos.md) | `ativas` | `02` | `vendor_profiles`, agenda de próximos noivos e cadastro sem depender do casal |
 | `05` | [Inspirações Pinterest: Web, Chrome e PWA](ativas/05-inspiracoes-pinterest-extensao-chrome-e-pwa.md) | `ativas` | `02` | `pinterest_inspirations`, API + Extensão Chrome MV3 + PWA Share Target + Feature Flag |
 | `06` | [Vitrine Regional, Destaque Randômico e Banner](ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md) | `ativas` | `04` | Busca por Cidade/UF, ordem randômica e Banner (máx. 5 vagas / ciclos de 2 meses) |
