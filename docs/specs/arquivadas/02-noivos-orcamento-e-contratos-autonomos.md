@@ -1,6 +1,6 @@
 # Spec 02 — Noivos: Orçamento Integrado e Contratos Autônomos
 
-- **Status:** Ativa (Próxima para implementação)
+- **Status:** Concluída (`arquivadas`)
 - **Dependências:** [01-autenticacao-perfis-e-design-system](../arquivadas/01-autenticacao-perfis-e-design-system.md)
 
 ## 1. Objetivo
@@ -52,8 +52,8 @@ Entregar o painel central dos noivos para planejar o casamento, controlar o orç
   - Lista/tabela responsiva de fornecedores com CRUD em modal/drawer e botão *"Copiar Link de Acesso"* para cada profissional.
 
 ## 5. Critérios de Aceite
-- [ ] Casal cria e edita seu casamento (`weddings`) e orçamento pretendido.
-- [ ] Casal cadastra fornecedor externo sem `vendor_profile_id` e registra valores de orçamento/contrato.
-- [ ] Cálculos financeiros e alertas de estouro atualizam reativamente ao salvar/editar fornecedor.
-- [ ] Cada fornecedor recebe um `invite_token` único e copiável.
+- [x] Casal cria e edita seu casamento (`weddings`) e orçamento pretendido.
+- [x] Casal cadastra fornecedor externo sem `vendor_profile_id` e registra valores de orçamento/contrato.
+- [x] Cálculos financeiros e alertas de estouro atualizam reativamente ao salvar/editar fornecedor.
+- [x] Cada fornecedor recebe um `invite_token` único e copiável.
 

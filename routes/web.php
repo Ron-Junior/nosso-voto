@@ -5,6 +5,7 @@ use App\Livewire\Admin\PlatformSettings;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard\UserPanel;
+use App\Livewire\Wedding\CoupleDashboard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +28,7 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('home');
     })->name('logout');
 
-    Route::get('/painel', UserPanel::class)->name('dashboard');
+    Route::get('/painel', CoupleDashboard::class)->name('dashboard');
     Route::get('/fornecedor/painel', UserPanel::class)->name('vendor.dashboard');
 
     Route::post('/painel/api-token', function (Request $request) {
