@@ -35,7 +35,7 @@ Este documento define os padrões obrigatórios de interface, arquitetura e qual
    - Valores financeiros (orçamento, contratos, pagamentos, presentes) devem usar `tabular-nums` para facilitar leitura comparativa.
    - Manter espaçamento inferior no conteúdo (`pb-24 lg:pb-10`) para que a barra de navegação móvel fixa nunca cubra ações da página.
 4. **Clareza Funcional por Perfil:**
-   - **Noivos / Casal:** foco direto em métricas financeiras (previsto vs. fechado vs. pago), fornecedores, inspirações do Pinterest e lista de presentes/carteira Pix.
+   - **Noivos / Casal:** foco direto em métricas financeiras (previsto vs. fechado vs. pago), fornecedores, checklist e progresso dos itens do grande dia, inspirações do Pinterest e lista de presentes/carteira Pix.
    - **Fornecedor:** foco na agenda cronológica de próximos casamentos, vitrine regional e gestão do perfil/portfólio.
    - **Admin:** foco operacional em feature flags, taxas globais e gestão de ciclos/vagas.
 5. **Privacidade e Segurança entre Perfis:**
@@ -50,7 +50,7 @@ Este documento define os padrões obrigatórios de interface, arquitetura e qual
    - Executar comandos PHP, Composer, Artisan, Pint e PHPUnit exclusivamente dentro do container `app` (`docker compose exec -T app ...`) e Vite/NPM no container `vite` (`docker compose exec -T vite ...`).
 2. **Testes Organizados por Módulo de Domínio:**
    - **Nunca** criar um arquivo de teste por spec (ex.: evitar `Spec01...Test.php`).
-   - Organizar os testes em `tests/Feature/<Modulo>/...Test.php` (ex.: `Auth/AuthenticationTest.php`, `Dashboard/UserPanelTest.php`, `Admin/PlatformSettingsTest.php`, `Wedding/BudgetTest.php`, `Gifts/WalletTest.php`).
+   - Organizar os testes em `tests/Feature/<Modulo>/...Test.php` (ex.: `Auth/AuthenticationTest.php`, `Dashboard/UserPanelTest.php`, `Admin/PlatformSettingsTest.php`, `Wedding/BudgetTest.php`, `Wedding/ChecklistTest.php`, `Gifts/WalletTest.php`).
 3. **Qualidade de Código:**
    - Rodar `./vendor/bin/pint --test` e `php artisan test` após alterações antes de concluir qualquer entrega.
 

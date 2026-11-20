@@ -7,7 +7,7 @@
 ---
 
 ## 1. Visão Geral do Produto
-O **Nosso Voto** é uma plataforma web projetada para noivos e noivas organizarem o casamento de ponta a ponta em um só lugar — conectando **orçamento integrado a fornecedores**, **referências visuais capturadas direto do Pinterest**, **colaboração com o cerimonialista** e **lista de presentes convertida em dinheiro via Pix/Cartão**.
+O **Nosso Voto** é uma plataforma web projetada para noivos e noivas organizarem o casamento de ponta a ponta em um só lugar — conectando **orçamento integrado a fornecedores**, **checklist e lista de itens para o grande dia**, **referências visuais capturadas direto do Pinterest**, **colaboração com o cerimonialista** e **lista de presentes convertida em dinheiro via Pix/Cartão**.
 
 A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, com baixíssimo custo operacional, crescimento orgânico/viral via fornecedores e geração de receita previsível desde os primeiros casamentos.
 
@@ -29,7 +29,7 @@ A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, co
 ## 3. Modelo de Negócio e Monetização
 
 ### 3.1. Noivos / Casal — 100% Gratuito
-- Cadastro, planejamento de orçamento, organização de fornecedores, captura de inspirações do Pinterest e criação da lista de presentes são **totalmente gratuitos** para o casal, maximizando a entrada de usuários na plataforma.
+- Cadastro, planejamento de orçamento, organização de fornecedores, checklist do grande dia, captura de inspirações do Pinterest e criação da lista de presentes são **totalmente gratuitos** para o casal, maximizando a entrada de usuários na plataforma.
 
 ### 3.2. Lista de Presentes em Dinheiro (Receita Principal Rápida)
 - Os convidados compram cotas ou presentes simbólicos (ex.: *Cota Lua de Mel*, *Jantar Romântico*) pagos via **Pix ou Cartão de Crédito**, deixando mensagens carinhosas para os noivos.
@@ -64,8 +64,8 @@ A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, co
 
 | Perfil | Responsabilidades e Recursos |
 | :--- | :--- |
-| **Noivos / Casal** | • **Orçamento Integrado aos Fornecedores:** definição de orçamento pretendido total; cada fornecedor registra *Teto Previsto*, *Valor Fechado* e *Valor Pago*, alimentando indicadores de *Orçamento vs. Gasto* e alertas de estouro.<br>• **Autonomia Total de Cadastro:** podem vincular fornecedores da Vitrine **ou cadastrar manualmente qualquer fornecedor externo que não use a plataforma** (registrando valores, parcelas, contato e observações do contrato).<br>• **Links de Convite:** geração opcional de link exclusivo para convidar o profissional a colaborar.<br>• **Central de Inspirações Pinterest:** pastas organizadas por *Decoração*, *Maquiagem* e *Penteado* + notas da noiva.<br>• **Lista de Presentes & Carteira Pix:** criação de cotas, escolha da regra de taxa, mural de recados e solicitação de resgate via Pix. |
-| **Cerimonialista** | • **Visão Consolidada e Colaborativa:** acessa pelo link de convite a lista unificada de todos os fornecedores do casal, seus status (*Em Cotação*, *Contratado*, *Quitado*), contatos e observações, podendo **atualizar status, contatos e adicionar notas/fornecedores** para apoiar os noivos. |
+| **Noivos / Casal** | • **Orçamento Integrado aos Fornecedores:** definição de orçamento pretendido total; cada fornecedor registra *Teto Previsto*, *Valor Fechado* e *Valor Pago*, alimentando indicadores de *Orçamento vs. Gasto* e alertas de estouro.<br>• **Checklist & Lista do Grande Dia:** lista organizada por categorias de tudo o que o casal precisa para o casamento (itens físicos, trajes, documentação e preparativos), podendo marcar o que **já tem**, o que está **completando aos poucos** (com controle de quantidades, ex.: *15 de 30 lembrancinhas*) e o que **ainda falta**, com barra de progresso geral.<br>• **Autonomia Total de Cadastro:** podem vincular fornecedores da Vitrine **ou cadastrar manualmente qualquer fornecedor externo que não use a plataforma** (registrando valores, parcelas, contato e observações do contrato).<br>• **Links de Convite:** geração opcional de link exclusivo para convidar o profissional a colaborar.<br>• **Central de Inspirações Pinterest:** pastas organizadas por *Decoração*, *Maquiagem* e *Penteado* + notas da noiva.<br>• **Lista de Presentes & Carteira Pix:** criação de cotas, escolha da regra de taxa, mural de recados e solicitação de resgate via Pix. |
+| **Cerimonialista** | • **Visão Consolidada e Colaborativa:** acessa pelo link de convite a lista unificada de todos os fornecedores do casal, seus status (*Em Cotação*, *Contratado*, *Quitado*), contatos e observações, podendo **atualizar status, contatos e adicionar notas/fornecedores** para apoiar os noivos, além de acompanhar e conferir os itens da lista do grande dia junto aos noivos. |
 | **Decorador** | • Visualiza o moodboard de **Decoração** salvo pela noiva no Pinterest (respeitando autorização do casal e a feature flag global de paywall). |
 | **Maquiadora e Penteadista** | • Visualizam o moodboard de **Maquiagem** e **Penteado** salvo pela noiva no Pinterest, com observações e links originais dos pins. |
 | **Fornecedor (Portal & Agenda)** | • **Agenda de Próximos Noivos:** visualização cronológica dos próximos casamentos e eventos fechados ou em negociação (com data, nomes dos noivos, local, status e valores do contrato).<br>• **Autonomia Total de Cadastro:** mesmo que os noivos **não utilizem a plataforma**, o fornecedor pode cadastrar manualmente os dados do casal, data do casamento, cidade/local, valor fechado, valor pago e observações na sua agenda.<br>• **Portfólio Pago & Sync Instagram:** área dedicada para ativar o módulo pago de portfólio, gerenciar fotos dos trabalhos e conectar a conta do **Instagram** para sincronização automática do feed.<br>• **Vitrine & Destaques:** gestão do perfil público, contratação/ativação do **Destaque Regional** e submissão para uma das **5 vagas do Banner** do ciclo vigente (ex: 2 meses). |
@@ -119,6 +119,7 @@ erDiagram
     WEDDINGS |o--o{ WEDDING_VENDORS : "contrata (opcional)"
     VENDOR_PROFILES |o--o{ WEDDING_VENDORS : "agenda/vincula (opcional)"
     VENDOR_PROFILES ||--o{ VENDOR_PORTFOLIO_ITEMS : "exibe (recurso pago)"
+    WEDDINGS ||--o{ WEDDING_CHECKLIST_ITEMS : "organiza"
     WEDDINGS ||--o{ PINTEREST_INSPIRATIONS : "salva"
     WEDDINGS ||--o{ GIFT_ITEMS : "oferece"
     WEDDINGS ||--o{ GIFT_PURCHASES : "recebe"
@@ -240,6 +241,20 @@ erDiagram
         boolean has_paid_pinterest_unlock
     }
 
+    WEDDING_CHECKLIST_ITEMS {
+        bigint id PK
+        bigint wedding_id FK
+        string title
+        string category "documentos_cerimonia | trajes_beleza | recepcao_festa | itens_grande_dia | convidados_convites | outros"
+        string status "pendente | em_andamento | concluido"
+        int quantity_needed "Quantidade necessaria (default 1)"
+        int quantity_acquired "Quantidade que ja tem (default 0)"
+        string assigned_to "partner_1 | partner_2 | ambos | cerimonialista"
+        date due_date
+        text notes
+        timestamp completed_at
+    }
+
     PINTEREST_INSPIRATIONS {
         bigint id PK
         bigint wedding_id FK
@@ -304,4 +319,5 @@ A documentação foi dividida em especificações incrementais dentro de `docs/s
 5. **[Spec 06 — Vitrine Regional, Destaque Randômico e Banner](specs/ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md):** busca regional randômica (`inRandomOrder()`) e ciclos de banner com limite máximo de 5 vagas.
 6. **[Spec 07 — Fornecedor: Portfólio Pago e Sync Instagram](specs/ativas/07-fornecedor-portfolio-pago-e-sync-instagram.md):** galeria paga na Vitrine com importação automática de mídias do Instagram.
 7. **[Spec 08 — Lista de Presentes, Taxas e Carteira Pix](specs/ativas/08-lista-de-presentes-taxas-e-carteira-pix.md):** página pública `/c/{slug}`, escolha de repasse/absorção de taxa e resgate via Chave Pix.
+8. **[Spec 09 — Noivos: Checklist e Lista do Grande Dia](specs/ativas/09-noivos-checklist-e-itens-do-grande-dia.md):** controle prático de itens e preparativos do casamento com marcação do que falta, do que está completando e do que os noivos já têm.
 

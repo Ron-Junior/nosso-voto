@@ -27,4 +27,5 @@ Esta pasta organiza todo o escopo do **Nosso Voto** em especificações técnica
 | `06` | [Vitrine Regional, Destaque Randômico e Banner](ativas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md) | `ativas` | `04` | Busca por Cidade/UF, ordem randômica e Banner (máx. 5 vagas / ciclos de 2 meses) |
 | `07` | [Fornecedor: Portfólio Pago e Sync Instagram](ativas/07-fornecedor-portfolio-pago-e-sync-instagram.md) | `ativas` | `06` | `vendor_portfolio_items`, paywall de portfólio e importação via Instagram API |
 | `08` | [Lista de Presentes, Taxas e Carteira Pix](ativas/08-lista-de-presentes-taxas-e-carteira-pix.md) | `ativas` | `02` | `gift_items`, `gift_purchases`, `wallet_withdrawals`, repasse/absorção e saque Pix |
+| `09` | [Noivos: Checklist e Lista do Grande Dia](ativas/09-noivos-checklist-e-itens-do-grande-dia.md) | `ativas` | `02` | `wedding_checklist_items`, controle do que precisa, está completando e já tem |
 
