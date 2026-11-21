@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Nosso Voto — Salvar Inspirações do Pinterest",
+  "version": "1.0.0",
+  "description": "Salve pins e pastas do Pinterest diretamente no seu moodboard de Decoração, Maquiagem e Penteado no Nosso Voto.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.pinterest.com/*",
+    "*://*.pinterest.com.br/*",
+    "http://localhost:8000/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "Nosso Voto — Salvar no Moodboard",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.pinterest.com/*",
+        "*://*.pinterest.com.br/*"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
+

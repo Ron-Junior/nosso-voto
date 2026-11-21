@@ -1,0 +1,162 @@
+.nv-pin-host {
+  position: relative !important;
+}
+
+.nv-pinterest-save-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2147483640;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  background-color: #C25E38;
+  color: #FFFFFF;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(44, 37, 35, 0.25);
+  transition: background-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.nv-pinterest-save-btn:hover {
+  background-color: #A84D2B;
+  transform: translateY(-1px);
+}
+
+.nv-pinterest-save-btn.is-saved {
+  background-color: #5A8F7B;
+}
+
+.nv-clip-popover {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483646;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  border: 1px solid #EAE0DA;
+  border-radius: 16px;
+  background-color: #FFFFFF;
+  color: #2C2523;
+  padding: 16px;
+  box-shadow: 0 18px 40px rgba(44, 37, 35, 0.2);
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nv-clip-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.nv-clip-popover-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2C2523;
+}
+
+.nv-clip-close {
+  border: 1px solid #EAE0DA;
+  background: #FBF9F7;
+  color: #6E625F;
+  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.nv-clip-label {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2C2523;
+}
+
+.nv-clip-categories {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.nv-clip-cat-btn {
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid #EAE0DA;
+  border-radius: 10px;
+  background-color: #FBF9F7;
+  color: #2C2523;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nv-clip-cat-btn.is-active {
+  border-color: #C25E38;
+  background-color: #F9EBE6;
+  color: #C25E38;
+}
+
+.nv-clip-input,
+.nv-clip-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #EAE0DA;
+  border-radius: 10px;
+  background-color: #FBF9F7;
+  color: #2C2523;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.nv-clip-input:focus,
+.nv-clip-textarea:focus {
+  outline: none;
+  border-color: #C25E38;
+  background-color: #FFFFFF;
+}
+
+.nv-clip-submit {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #C25E38;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nv-clip-submit:hover {
+  background-color: #A84D2B;
+}
+
+.nv-clip-status {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6E625F;
+}
+
+.nv-clip-status.is-success {
+  color: #5A8F7B;
+}
+
+.nv-clip-status.is-error {
+  color: #B91C1C;
+}
+
