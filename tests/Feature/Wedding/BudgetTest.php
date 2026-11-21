@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -356,5 +357,31 @@ class BudgetTest extends TestCase
         $this->assertNotNull($wedding);
         $this->assertSame('SC', $wedding->state);
         $this->assertSame('Balneário Camboriú', $wedding->city);
+    }
+
+    public function test_couple_dashboard_renders_multiple_vendors_within_four_queries(): void
+    {
+        $couple = User::factory()->couple()->create();
+        $wedding = Wedding::factory()->create([
+            'user_id' => $couple->id,
+            'estimated_budget' => 80000.00,
+        ]);
+
+        WeddingVendor::factory()->count(3)->create([
+            'wedding_id' => $wedding->id,
+        ]);
+
+        $this->actingAs($couple);
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        Livewire::test(CoupleDashboard::class)
+            ->assertOk();
+
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $this->assertLessThanOrEqual(4, count($queries));
     }
 }

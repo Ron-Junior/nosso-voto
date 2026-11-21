@@ -37,7 +37,9 @@
                 @foreach ($categoryLabels as $catKey => $catLabel)
                     <button type="button"
                             wire:click="quickSave('{{ $catKey }}')"
-                            class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                            wire:loading.attr="disabled"
+                            wire:target="quickSave,saveInspiration"
+                            class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                         <span wire:loading.remove wire:target="quickSave('{{ $catKey }}')">
                             Salvar em {{ $catLabel }}
                         </span>
@@ -54,7 +56,24 @@
                 </label>
                 <input id="pwa_pinterest_url"
                        type="url"
-                       wire:model.live="pinterest_url"
+                       wire:model="pinterest_url"
+                       @input="
+                           try {
+                               const val = ($el.value || '').trim();
+                               if (val) {
+                                   const u = new URL(val);
+                                   const host = u.hostname.toLowerCase();
+                                   const path = u.pathname.replace(/^\/+|\/+$/g, '');
+                                   if (host.includes('pin.it')) {
+                                       $wire.type = 'pin';
+                                   } else if (host.includes('pinterest.') && !/(^|\/)pin(\/|$)/i.test(path) && path.includes('/')) {
+                                       $wire.type = 'board';
+                                   } else {
+                                       $wire.type = 'pin';
+                                   }
+                               }
+                           } catch (e) {}
+                       "
                        placeholder="https://br.pinterest.com/pin/..."
                        class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-3 min-h-[48px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                 @error('pinterest_url')
@@ -126,12 +145,15 @@
 
             <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
                 <button type="submit"
-                        class="flex-1 inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-5 py-3 min-h-[48px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer">
+                        wire:loading.attr="disabled"
+                        wire:target="quickSave,saveInspiration"
+                        class="flex-1 inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-5 py-3 min-h-[48px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                     <span wire:loading.remove wire:target="saveInspiration">Salvar com Notas</span>
                     <span wire:loading wire:target="saveInspiration">Salvando...</span>
                 </button>
 
                 <a href="{{ route('inspirations.index') }}"
+                   wire:navigate.hover
                    class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-5 py-3 min-h-[48px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
                     Ver Moodboard
                 </a>
@@ -150,6 +172,7 @@
                 </div>
 
                 <a href="{{ route('inspirations.index') }}"
+                   wire:navigate.hover
                    class="inline-flex items-center justify-center rounded-xl bg-[#5A8F7B] px-4 py-2 min-h-[44px] text-xs font-semibold text-white shrink-0">
                     Abrir Moodboard
                 </a>

@@ -64,10 +64,14 @@ class CoupleDashboard extends Component
 
     public string $statusMessage = '';
 
+    private ?Wedding $cachedWedding = null;
+
+    private bool $weddingLoaded = false;
+
     public function mount(): void
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         if ($wedding !== null) {
             $this->fillWeddingForm($wedding);
@@ -82,7 +86,7 @@ class CoupleDashboard extends Component
     {
         $user = $this->authorizeCoupleAccess();
         $this->statusMessage = '';
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         if ($wedding !== null) {
             $this->fillWeddingForm($wedding);
@@ -149,7 +153,7 @@ class CoupleDashboard extends Component
             'estimated_budget' => $validated['estimated_budget'],
         ];
 
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         if ($wedding !== null) {
             $wedding->update($payload);
@@ -164,6 +168,8 @@ class CoupleDashboard extends Component
 
         $freshWedding = $wedding->fresh();
         $user->setRelation('wedding', $freshWedding);
+        $this->cachedWedding = $freshWedding;
+        $this->weddingLoaded = true;
 
         $this->fillWeddingForm($freshWedding);
         $this->showWeddingModal = false;
@@ -173,7 +179,7 @@ class CoupleDashboard extends Component
     public function saveBudget(): void
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         if ($wedding === null) {
             $this->openWeddingModal();
@@ -193,7 +199,10 @@ class CoupleDashboard extends Component
             'estimated_budget' => $validated['estimated_budget'],
         ]);
 
-        $this->estimated_budget = number_format((float) $wedding->fresh()->estimated_budget, 2, '.', '');
+        $freshWedding = $wedding->fresh();
+        $this->cachedWedding = $freshWedding;
+        $this->weddingLoaded = true;
+        $this->estimated_budget = number_format((float) $freshWedding->estimated_budget, 2, '.', '');
         $this->notify('Orçamento pretendido atualizado com sucesso.');
     }
 
@@ -202,7 +211,7 @@ class CoupleDashboard extends Component
         $user = $this->authorizeCoupleAccess();
         $this->statusMessage = '';
 
-        if ($user->wedding()->first() === null) {
+        if ($this->resolveWedding($user) === null) {
             $this->openWeddingModal();
 
             return;
@@ -358,7 +367,7 @@ class CoupleDashboard extends Component
     public function render(): View
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         $vendors = collect();
         $allVendorsCount = 0;
@@ -371,23 +380,19 @@ class CoupleDashboard extends Component
         $daysUntilWedding = null;
 
         if ($wedding !== null) {
-            $allVendorsCount = $wedding->vendors()->count();
-            $totalEstimatedVendors = $wedding->totalEstimatedVendors();
-            $totalContracted = $wedding->totalContracted();
-            $totalPaid = $wedding->totalPaid();
-            $remainingToPay = $wedding->remainingToPay();
-            $budgetBalance = $wedding->budgetBalance();
-            $isOverBudget = $wedding->isOverBudget();
             $daysUntilWedding = $wedding->daysUntilWedding();
 
             $query = $wedding->vendors()->latest('id');
+            $hasFilters = false;
 
             if ($this->categoryFilter !== 'all' && in_array($this->categoryFilter, WeddingVendor::CATEGORIES, true)) {
                 $query->where('category', $this->categoryFilter);
+                $hasFilters = true;
             }
 
             if ($this->statusFilter !== 'all' && in_array($this->statusFilter, WeddingVendor::STATUSES, true)) {
                 $query->where('status', $this->statusFilter);
+                $hasFilters = true;
             }
 
             if (filled($this->search)) {
@@ -397,9 +402,30 @@ class CoupleDashboard extends Component
                         ->orWhereLike('contact_name', $term, caseSensitive: false)
                         ->orWhereLike('notes', $term, caseSensitive: false);
                 });
+                $hasFilters = true;
             }
 
             $vendors = $query->get();
+
+            if (! $hasFilters) {
+                $allVendorsCount = $vendors->count();
+                $totalEstimatedVendors = round((float) $vendors->sum('estimated_amount'), 2);
+                $totalContracted = round((float) $vendors->sum('contracted_amount'), 2);
+                $totalPaid = round((float) $vendors->sum('paid_amount'), 2);
+            } else {
+                $totals = $wedding->vendors()
+                    ->selectRaw('COUNT(*) as total_count, COALESCE(SUM(estimated_amount), 0) as total_estimated, COALESCE(SUM(contracted_amount), 0) as total_contracted, COALESCE(SUM(paid_amount), 0) as total_paid')
+                    ->first();
+
+                $allVendorsCount = (int) ($totals->total_count ?? 0);
+                $totalEstimatedVendors = round((float) ($totals->total_estimated ?? 0), 2);
+                $totalContracted = round((float) ($totals->total_contracted ?? 0), 2);
+                $totalPaid = round((float) ($totals->total_paid ?? 0), 2);
+            }
+
+            $remainingToPay = round($totalContracted - $totalPaid, 2);
+            $budgetBalance = round((float) $wedding->estimated_budget - $totalContracted, 2);
+            $isOverBudget = $totalContracted > (float) $wedding->estimated_budget;
         }
 
         return view('livewire.wedding.couple-dashboard', [
@@ -418,6 +444,7 @@ class CoupleDashboard extends Component
             'statusLabels' => WeddingVendor::statusLabels(),
             'states' => BrazilLocations::states(),
             'citiesForSelectedState' => BrazilLocations::citiesForState($this->state),
+            'citiesByState' => BrazilLocations::allCitiesByState(),
         ]);
     }
 
@@ -430,10 +457,20 @@ class CoupleDashboard extends Component
         return $user;
     }
 
+    private function resolveWedding(User $user): ?Wedding
+    {
+        if (! $this->weddingLoaded) {
+            $this->cachedWedding = $user->wedding()->first();
+            $this->weddingLoaded = true;
+        }
+
+        return $this->cachedWedding;
+    }
+
     private function requireWedding(): Wedding
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         abort_if($wedding === null, 404);
 

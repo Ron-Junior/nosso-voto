@@ -20,3 +20,7 @@
     --color-sage: #5A8F7B;
     --color-sage-soft: #EBF3F0;
 }
+
+[x-cloak] {
+    display: none !important;
+}

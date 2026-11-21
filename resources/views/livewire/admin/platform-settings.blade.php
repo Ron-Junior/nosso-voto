@@ -27,8 +27,13 @@
 
             <button type="button"
                     wire:click="togglePinterestPaywall"
-                    class="inline-flex items-center justify-center rounded-xl px-5 py-2.5 min-h-[44px] text-sm font-semibold transition-colors cursor-pointer shrink-0 {{ $paywall_pinterest_inspirations_enabled ? 'bg-[#C25E38] text-white hover:bg-[#A84D2B]' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
-                {{ $paywall_pinterest_inspirations_enabled ? 'Desligar Paywall' : 'Ligar Paywall' }}
+                    wire:loading.attr="disabled"
+                    wire:target="togglePinterestPaywall"
+                    class="inline-flex items-center justify-center rounded-xl px-5 py-2.5 min-h-[44px] text-sm font-semibold transition-colors cursor-pointer shrink-0 disabled:opacity-60 disabled:cursor-wait {{ $paywall_pinterest_inspirations_enabled ? 'bg-[#C25E38] text-white hover:bg-[#A84D2B]' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                <span wire:loading.remove wire:target="togglePinterestPaywall">
+                    {{ $paywall_pinterest_inspirations_enabled ? 'Desligar Paywall' : 'Ligar Paywall' }}
+                </span>
+                <span wire:loading wire:target="togglePinterestPaywall">Atualizando...</span>
             </button>
         </div>
     </section>
@@ -137,7 +142,9 @@
             </label>
 
             <button type="submit"
-                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                    wire:loading.attr="disabled"
+                    wire:target="save"
+                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                 <span wire:loading.remove wire:target="save">Salvar Configurações</span>
                 <span wire:loading wire:target="save">Salvando...</span>
             </button>

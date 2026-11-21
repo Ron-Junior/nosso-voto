@@ -212,6 +212,13 @@ class BrazilLocations
     ];
 
     /**
+     * Request/process-level cache of locale-sorted cities indexed by UF.
+     *
+     * @var array<string, list<string>>|null
+     */
+    private static ?array $sortedCitiesCache = null;
+
+    /**
      * Return all 27 Brazilian states indexed by UF code.
      *
      * @return array<string, string>
@@ -232,6 +239,35 @@ class BrazilLocations
     }
 
     /**
+     * Return all states mapped to their locale-sorted cities, cached per process.
+     *
+     * @return array<string, list<string>>
+     */
+    public static function allCitiesByState(): array
+    {
+        if (self::$sortedCitiesCache !== null) {
+            return self::$sortedCitiesCache;
+        }
+
+        $collator = class_exists(Collator::class) ? Collator::create('pt_BR') : null;
+        $sorted = [];
+
+        foreach (self::CITIES_BY_STATE as $uf => $cities) {
+            $list = $cities;
+
+            if ($collator !== null) {
+                $collator->sort($list);
+            } else {
+                sort($list, SORT_LOCALE_STRING | SORT_FLAG_CASE);
+            }
+
+            $sorted[$uf] = array_values($list);
+        }
+
+        return self::$sortedCitiesCache = $sorted;
+    }
+
+    /**
      * Return sorted cities for a given UF code.
      *
      * @return list<string>
@@ -240,21 +276,11 @@ class BrazilLocations
     {
         $normalized = Str::upper(trim((string) $state));
 
-        if ($normalized === '' || ! isset(self::CITIES_BY_STATE[$normalized])) {
+        if ($normalized === '') {
             return [];
         }
 
-        $cities = self::CITIES_BY_STATE[$normalized];
-
-        $collator = class_exists(Collator::class) ? Collator::create('pt_BR') : null;
-
-        if ($collator !== null) {
-            $collator->sort($cities);
-        } else {
-            sort($cities, SORT_LOCALE_STRING | SORT_FLAG_CASE);
-        }
-
-        return array_values($cities);
+        return self::allCitiesByState()[$normalized] ?? [];
     }
 
     /**

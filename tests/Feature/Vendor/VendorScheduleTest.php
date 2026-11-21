@@ -10,6 +10,7 @@ use App\Models\VendorProfile;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -564,5 +565,29 @@ class VendorScheduleTest extends TestCase
             ->assertHasErrors(['couple_names', 'contact_email', 'contracted_amount', 'paid_amount'])
             ->call('closeScheduleModal')
             ->assertSet('showScheduleModal', false);
+    }
+
+    public function test_vendor_schedule_skips_unused_platform_settings_and_contact_email_queries(): void
+    {
+        $vendorUser = User::factory()->vendor()->create(['email' => 'agenda@exemplo.com.br']);
+        $profile = VendorProfile::factory()->create(['user_id' => $vendorUser->id]);
+
+        WeddingVendor::factory()->autonomousForVendor($profile)->create([
+            'event_date' => now()->addDays(15)->toDateString(),
+        ]);
+
+        $this->actingAs($vendorUser);
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        Livewire::test(VendorSchedule::class)
+            ->assertOk();
+
+        $queries = collect(DB::getQueryLog())->pluck('query');
+        DB::disableQueryLog();
+
+        $this->assertFalse($queries->contains(fn (string $sql): bool => str_contains($sql, 'platform_settings')));
+        $this->assertFalse($queries->contains(fn (string $sql): bool => str_contains($sql, 'contact_email')));
     }
 }

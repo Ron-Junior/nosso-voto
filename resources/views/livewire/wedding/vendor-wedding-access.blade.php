@@ -1,4 +1,39 @@
-<div class="space-y-6">
+<div class="space-y-6"
+     x-data="{
+         activeInspCat: $wire.entangle('inspirationCategoryFilter'),
+         openNewVendor() {
+             $wire.editingVendorId = null;
+             $wire.vendor_name = '';
+             $wire.category = 'buffet';
+             $wire.contact_name = null;
+             $wire.contact_phone = null;
+             $wire.contact_email = null;
+             $wire.estimated_amount = '0.00';
+             $wire.contracted_amount = '0.00';
+             $wire.paid_amount = '0.00';
+             $wire.status = 'cotando';
+             $wire.notes = null;
+             $wire.showVendorModal = true;
+         },
+         openEditVendor(v) {
+             $wire.editingVendorId = v.id;
+             $wire.vendor_name = v.vendor_name || '';
+             $wire.category = v.category || 'buffet';
+             $wire.contact_name = v.contact_name ?? null;
+             $wire.contact_phone = v.contact_phone ?? null;
+             $wire.contact_email = v.contact_email ?? null;
+             $wire.estimated_amount = v.estimated_amount ?? '0.00';
+             $wire.contracted_amount = v.contracted_amount ?? '0.00';
+             $wire.paid_amount = v.paid_amount ?? '0.00';
+             $wire.status = v.status || 'cotando';
+             $wire.notes = v.notes ?? null;
+             $wire.showVendorModal = true;
+         },
+         closeVendorModal() {
+             $wire.showVendorModal = false;
+         }
+     }"
+     @keydown.escape.window="if ($wire.showVendorModal) closeVendorModal()">
     <x-toast :message="$statusMessage" />
 
     {{-- Wedding Event Header --}}
@@ -51,7 +86,7 @@
             @if ($isCerimonialista)
                 <div class="flex shrink-0">
                     <button type="button"
-                            wire:click="openNewVendorModal"
+                            @click="openNewVendor()"
                             class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
                         + Adicionar Fornecedor para o Casal
                     </button>
@@ -135,7 +170,7 @@
                 </div>
 
                 <button type="button"
-                        wire:click="openNewVendorModal"
+                        @click="openNewVendor()"
                         class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0">
                     + Adicionar Fornecedor para o Casal
                 </button>
@@ -147,7 +182,7 @@
                     <label for="cerimonial_vendor_search" class="sr-only">Buscar fornecedor</label>
                     <input id="cerimonial_vendor_search"
                            type="search"
-                           wire:model.live.debounce.250ms="search"
+                           wire:model.live.debounce.350ms="search"
                            placeholder="Buscar por nome, contato ou nota..."
                            class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                 </div>
@@ -177,6 +212,7 @@
                 </div>
             </div>
 
+            <div wire:loading.class="opacity-60 transition-opacity" wire:target="search,categoryFilter,statusFilter">
             @if ($vendors->isEmpty())
                 <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-8 text-center space-y-3">
                     <p class="font-serif text-lg font-semibold text-[#2C2523]">
@@ -301,14 +337,28 @@
                                     @foreach ($statusLabels as $statusKey => $statusLabel)
                                         <button type="button"
                                                 wire:click="updateVendorStatus({{ $vendor->id }}, '{{ $statusKey }}')"
-                                                class="inline-flex items-center justify-center rounded-xl px-3 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer {{ $vendor->status === $statusKey ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                                                wire:loading.attr="disabled"
+                                                wire:target="updateVendorStatus"
+                                                class="inline-flex items-center justify-center rounded-xl px-3 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait {{ $vendor->status === $statusKey ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
                                             {{ $statusLabel }}
                                         </button>
                                     @endforeach
                                 </div>
 
                                 <button type="button"
-                                        wire:click="editVendor({{ $vendor->id }})"
+                                        @click="openEditVendor(@js([
+                                            'id' => $vendor->id,
+                                            'vendor_name' => $vendor->vendor_name,
+                                            'category' => $vendor->category,
+                                            'contact_name' => $vendor->contact_name,
+                                            'contact_phone' => $vendor->contact_phone,
+                                            'contact_email' => $vendor->contact_email,
+                                            'estimated_amount' => number_format((float) $vendor->estimated_amount, 2, '.', ''),
+                                            'contracted_amount' => number_format((float) $vendor->contracted_amount, 2, '.', ''),
+                                            'paid_amount' => number_format((float) $vendor->paid_amount, 2, '.', ''),
+                                            'status' => $vendor->status,
+                                            'notes' => $vendor->notes,
+                                        ]))"
                                         class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-4 py-2 min-h-[44px] text-xs font-semibold text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer shrink-0">
                                     Editar Fornecedor
                                 </button>
@@ -317,28 +367,33 @@
                     @endforeach
                 </div>
             @endif
+            </div>
         </section>
 
         {{-- Collaborative Create/Edit Vendor Modal --}}
-        @if ($showVendorModal)
-            <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
-                 role="dialog"
-                 aria-modal="true"
-                 aria-labelledby="cerimonial-vendor-modal-title">
-                <div class="w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-xl space-y-5">
-                    <div class="flex items-center justify-between gap-3">
-                        <h2 id="cerimonial-vendor-modal-title" class="font-serif text-xl font-semibold text-[#2C2523]">
-                            {{ $editingVendorId !== null ? 'Editar Fornecedor do Casal' : 'Adicionar Fornecedor para o Casal' }}
-                        </h2>
-                        <button type="button"
-                                wire:click="closeVendorModal"
-                                aria-label="Fechar modal"
-                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[#EAE0DA] text-[#6E625F] hover:text-[#2C2523] cursor-pointer">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+        <div x-cloak
+             x-show="$wire.showVendorModal"
+             @click.self="closeVendorModal()"
+             class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="cerimonial-vendor-modal-title">
+            <div class="w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-xl space-y-5">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 id="cerimonial-vendor-modal-title"
+                        x-text="$wire.editingVendorId !== null ? 'Editar Fornecedor do Casal' : 'Adicionar Fornecedor para o Casal'"
+                        class="font-serif text-xl font-semibold text-[#2C2523]">
+                        {{ $editingVendorId !== null ? 'Editar Fornecedor do Casal' : 'Adicionar Fornecedor para o Casal' }}
+                    </h2>
+                    <button type="button"
+                            @click="closeVendorModal()"
+                            aria-label="Fechar modal"
+                            class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[#EAE0DA] text-[#6E625F] hover:text-[#2C2523] cursor-pointer">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
                     <form wire:submit="saveVendor" class="space-y-4">
                         <div class="grid gap-4 sm:grid-cols-2">
@@ -492,13 +547,16 @@
 
                         <div class="pt-3 border-t border-[#EAE0DA] flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
                             <button type="button"
-                                    wire:click="closeVendorModal"
+                                    @click="closeVendorModal()"
                                     class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-5 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] cursor-pointer">
                                 Cancelar
                             </button>
                             <button type="submit"
-                                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
-                                <span wire:loading.remove wire:target="saveVendor">
+                                    wire:loading.attr="disabled"
+                                    wire:target="saveVendor"
+                                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
+                                <span wire:loading.remove wire:target="saveVendor"
+                                      x-text="$wire.editingVendorId !== null ? 'Salvar Alterações' : 'Adicionar Fornecedor'">
                                     {{ $editingVendorId !== null ? 'Salvar Alterações' : 'Adicionar Fornecedor' }}
                                 </span>
                                 <span wire:loading wire:target="saveVendor">Salvando...</span>
@@ -507,7 +565,6 @@
                     </form>
                 </div>
             </div>
-        @endif
     @else
         {{-- Restricted Single-Vendor Access View (non-Cerimonialista categories) --}}
         <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-5">
@@ -644,7 +701,9 @@
                         <div>
                             <button type="button"
                                     wire:click="unlockPinterestMoodboard"
-                                    class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-3 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                                    wire:loading.attr="disabled"
+                                    wire:target="unlockPinterestMoodboard"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-3 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                                 <span wire:loading.remove wire:target="unlockPinterestMoodboard">Desbloquear Inspirações do Pinterest</span>
                                 <span wire:loading wire:target="unlockPinterestMoodboard">Desbloqueando...</span>
                             </button>
@@ -654,16 +713,20 @@
                     @if (count($allowedPinterestCategories) > 1)
                         <div class="flex flex-wrap gap-2">
                             <button type="button"
+                                    @click="activeInspCat = 'all'"
                                     wire:click="selectInspirationCategory('all')"
-                                    class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer {{ $inspirationCategoryFilter === 'all' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                                    :class="activeInspCat === 'all' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]'"
+                                    class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer">
                                 <span>Todas</span>
                                 <span class="tabular-nums">({{ $pinterestTotalCount }})</span>
                             </button>
 
                             @foreach ($allowedPinterestCategories as $allowedCat)
                                 <button type="button"
+                                        @click="activeInspCat = '{{ $allowedCat }}'"
                                         wire:click="selectInspirationCategory('{{ $allowedCat }}')"
-                                        class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer {{ $inspirationCategoryFilter === $allowedCat ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                                        :class="activeInspCat === '{{ $allowedCat }}' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]'"
+                                        class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer">
                                     <span>{{ $inspirationCategoryLabels[$allowedCat] ?? $allowedCat }}</span>
                                     <span class="tabular-nums">({{ $pinterestCountsByCategory[$allowedCat] ?? 0 }})</span>
                                 </button>
@@ -671,6 +734,7 @@
                         </div>
                     @endif
 
+                    <div wire:loading.class="opacity-60 transition-opacity" wire:target="selectInspirationCategory">
                     @if ($pinterestInspirations->isEmpty())
                         <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-6 text-center space-y-1.5">
                             <p class="font-serif text-base font-semibold text-[#2C2523]">
@@ -727,6 +791,7 @@
                             @endforeach
                         </div>
                     @endif
+                    </div>
                 @endif
             </section>
         @endif

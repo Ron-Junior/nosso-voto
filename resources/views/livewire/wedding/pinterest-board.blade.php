@@ -1,4 +1,26 @@
-<div class="space-y-6">
+<div class="space-y-6"
+     x-data="{
+         activeCategory: $wire.entangle('activeCategory'),
+         startEdit(item) {
+             $wire.editingInspirationId = item.id;
+             $wire.category = item.category || 'decoracao';
+             $wire.type = item.type || 'pin';
+             $wire.title = item.title || '';
+             $wire.pinterest_url = item.pinterest_url || '';
+             $wire.image_url = item.image_url ?? null;
+             $wire.bride_notes = item.bride_notes ?? null;
+             document.getElementById('inspiration-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+         },
+         cancelEdit() {
+             $wire.editingInspirationId = null;
+             $wire.category = ['decoracao', 'maquiagem', 'penteado'].includes(this.activeCategory) ? this.activeCategory : 'decoracao';
+             $wire.type = 'pin';
+             $wire.title = '';
+             $wire.pinterest_url = '';
+             $wire.image_url = null;
+             $wire.bride_notes = null;
+         }
+     }">
     <x-toast :message="$statusMessage" />
 
     {{-- Header --}}
@@ -18,10 +40,12 @@
 
             <div class="flex flex-col sm:flex-row gap-2.5 shrink-0">
                 <a href="{{ route('inspirations.pwa-share') }}"
+                   wire:navigate.hover
                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
                     Captura Rápida (PWA)
                 </a>
                 <a href="{{ route('dashboard') }}"
+                   wire:navigate.hover
                    class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
                     Voltar ao Painel
                 </a>
@@ -33,10 +57,14 @@
             <button type="button"
                     role="tab"
                     aria-selected="{{ $activeCategory === 'all' ? 'true' : 'false' }}"
+                    :aria-selected="(activeCategory === 'all').toString()"
+                    @click="activeCategory = 'all'"
                     wire:click="selectCategory('all')"
-                    class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 min-h-[44px] text-sm font-semibold transition-colors cursor-pointer {{ $activeCategory === 'all' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                    :class="activeCategory === 'all' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]'"
+                    class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 min-h-[44px] text-sm font-semibold transition-colors cursor-pointer">
                 <span>Todas</span>
-                <span class="rounded-lg px-2 py-0.5 text-xs tabular-nums {{ $activeCategory === 'all' ? 'bg-white/20 text-white' : 'bg-[#FFFFFF] text-[#2C2523]' }}">
+                <span :class="activeCategory === 'all' ? 'bg-white/20 text-white' : 'bg-[#FFFFFF] text-[#2C2523]'"
+                      class="rounded-lg px-2 py-0.5 text-xs tabular-nums">
                     {{ $totalCount }}
                 </span>
             </button>
@@ -45,10 +73,14 @@
                 <button type="button"
                         role="tab"
                         aria-selected="{{ $activeCategory === $catKey ? 'true' : 'false' }}"
+                        :aria-selected="(activeCategory === '{{ $catKey }}').toString()"
+                        @click="activeCategory = '{{ $catKey }}'"
                         wire:click="selectCategory('{{ $catKey }}')"
-                        class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 min-h-[44px] text-sm font-semibold transition-colors cursor-pointer {{ $activeCategory === $catKey ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                        :class="activeCategory === '{{ $catKey }}' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]'"
+                        class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 min-h-[44px] text-sm font-semibold transition-colors cursor-pointer">
                     <span>{{ $catLabel }}</span>
-                    <span class="rounded-lg px-2 py-0.5 text-xs tabular-nums {{ $activeCategory === $catKey ? 'bg-white/20 text-white' : 'bg-[#FFFFFF] text-[#2C2523]' }}">
+                    <span :class="activeCategory === '{{ $catKey }}' ? 'bg-white/20 text-white' : 'bg-[#FFFFFF] text-[#2C2523]'"
+                          class="rounded-lg px-2 py-0.5 text-xs tabular-nums">
                         {{ $countsByCategory[$catKey] ?? 0 }}
                     </span>
                 </button>
@@ -57,10 +89,11 @@
     </section>
 
     {{-- Manual Pin/Board Capture Form --}}
-    <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-5">
+    <section id="inspiration-form" class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-                <h2 class="font-serif text-xl font-semibold text-[#2C2523]">
+                <h2 x-text="$wire.editingInspirationId !== null ? 'Editar Referência do Pinterest' : 'Adicionar Pin ou Pasta Manualmente'"
+                    class="font-serif text-xl font-semibold text-[#2C2523]">
                     {{ $editingInspirationId !== null ? 'Editar Referência do Pinterest' : 'Adicionar Pin ou Pasta Manualmente' }}
                 </h2>
                 <p class="text-sm text-[#6E625F]">
@@ -68,13 +101,13 @@
                 </p>
             </div>
 
-            @if ($editingInspirationId !== null)
-                <button type="button"
-                        wire:click="cancelEdit"
-                        class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2 min-h-[44px] text-xs font-semibold text-[#2C2523] hover:border-[#C25E38] cursor-pointer self-start">
-                    Cancelar Edição
-                </button>
-            @endif
+            <button type="button"
+                    x-cloak
+                    x-show="$wire.editingInspirationId !== null"
+                    @click="cancelEdit()"
+                    class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2 min-h-[44px] text-xs font-semibold text-[#2C2523] hover:border-[#C25E38] cursor-pointer self-start">
+                Cancelar Edição
+            </button>
         </div>
 
         <form wire:submit="saveInspiration" class="space-y-4">
@@ -170,8 +203,11 @@
 
             <div class="flex flex-col sm:flex-row sm:justify-end gap-2.5">
                 <button type="submit"
-                        class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
-                    <span wire:loading.remove wire:target="saveInspiration">
+                        wire:loading.attr="disabled"
+                        wire:target="saveInspiration"
+                        class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
+                    <span wire:loading.remove wire:target="saveInspiration"
+                          x-text="$wire.editingInspirationId !== null ? 'Atualizar Inspiração' : 'Salvar Inspiração'">
                         {{ $editingInspirationId !== null ? 'Atualizar Inspiração' : 'Salvar Inspiração' }}
                     </span>
                     <span wire:loading wire:target="saveInspiration">Salvando...</span>
@@ -197,7 +233,7 @@
                     <label for="inspiration_search" class="sr-only">Buscar inspiração</label>
                     <input id="inspiration_search"
                            type="search"
-                           wire:model.live.debounce.250ms="search"
+                           wire:model.live.debounce.350ms="search"
                            placeholder="Buscar por título ou nota..."
                            class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                 </div>
@@ -216,6 +252,7 @@
             </div>
         </div>
 
+        <div wire:loading.class="opacity-60 transition-opacity" wire:target="selectCategory,search,typeFilter">
         @if ($inspirations->isEmpty())
             <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-8 text-center space-y-2">
                 <p class="font-serif text-lg font-semibold text-[#2C2523]">
@@ -279,7 +316,15 @@
                                 </a>
 
                                 <button type="button"
-                                        wire:click="editInspiration({{ $inspiration->id }})"
+                                        @click="startEdit(@js([
+                                            'id' => $inspiration->id,
+                                            'category' => $inspiration->category,
+                                            'type' => $inspiration->type,
+                                            'title' => $inspiration->title,
+                                            'pinterest_url' => $inspiration->pinterest_url,
+                                            'image_url' => $inspiration->image_url,
+                                            'bride_notes' => $inspiration->bride_notes,
+                                        ]))"
                                         class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-3.5 py-2 min-h-[44px] text-xs font-semibold text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">
                                     Editar
                                 </button>
@@ -287,7 +332,9 @@
                                 <button type="button"
                                         wire:click="deleteInspiration({{ $inspiration->id }})"
                                         wire:confirm="Remover esta inspiração do moodboard?"
-                                        class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2 min-h-[44px] text-xs font-medium text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer">
+                                        wire:loading.attr="disabled"
+                                        wire:target="deleteInspiration({{ $inspiration->id }})"
+                                        class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2 min-h-[44px] text-xs font-medium text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                                     Excluir
                                 </button>
                             </div>
@@ -296,6 +343,7 @@
                 @endforeach
             </div>
         @endif
+        </div>
     </section>
 
     {{-- Specialty Vendors Sharing & Authorization --}}
@@ -311,7 +359,7 @@
 
         @if ($specialtyVendors->isEmpty())
             <div class="rounded-xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-5 text-sm text-[#6E625F]">
-                Cadastre um fornecedor nas categorias <strong class="font-medium text-[#2C2523]">Decoração</strong>, <strong class="font-medium text-[#2C2523]">Maquiagem</strong> ou <strong class="font-medium text-[#2C2523]">Penteado</strong> no <a href="{{ route('dashboard') }}" class="font-semibold text-[#C25E38] underline">Painel dos Noivos</a> para gerar o link exclusivo do moodboard.
+                Cadastre um fornecedor nas categorias <strong class="font-medium text-[#2C2523]">Decoração</strong>, <strong class="font-medium text-[#2C2523]">Maquiagem</strong> ou <strong class="font-medium text-[#2C2523]">Penteado</strong> no <a href="{{ route('dashboard') }}" wire:navigate.hover class="font-semibold text-[#C25E38] underline">Painel dos Noivos</a> para gerar o link exclusivo do moodboard.
             </div>
         @else
             <div class="space-y-3">
@@ -352,7 +400,9 @@
 
                             <button type="button"
                                     wire:click="toggleVendorPinterestAuthorization({{ $vendor->id }})"
-                                    class="inline-flex items-center justify-center rounded-xl px-4 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer {{ $vendor->is_pinterest_authorized ? 'border border-[#EAE0DA] bg-[#FFFFFF] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' : 'bg-[#C25E38] text-white hover:bg-[#A84D2B]' }}">
+                                    wire:loading.attr="disabled"
+                                    wire:target="toggleVendorPinterestAuthorization({{ $vendor->id }})"
+                                    class="inline-flex items-center justify-center rounded-xl px-4 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait {{ $vendor->is_pinterest_authorized ? 'border border-[#EAE0DA] bg-[#FFFFFF] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' : 'bg-[#C25E38] text-white hover:bg-[#A84D2B]' }}">
                                 {{ $vendor->is_pinterest_authorized ? 'Pausar Acesso' : 'Autorizar Acesso' }}
                             </button>
                         </div>
@@ -379,7 +429,9 @@
 
             <button type="button"
                     wire:click="regenerateToken"
-                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0">
+                    wire:loading.attr="disabled"
+                    wire:target="regenerateToken"
+                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0 disabled:opacity-60 disabled:cursor-wait">
                 <span wire:loading.remove wire:target="regenerateToken">Gerar Novo Token</span>
                 <span wire:loading wire:target="regenerateToken">Gerando...</span>
             </button>
@@ -408,7 +460,7 @@
                                     document.body.removeChild(el);
                                 }
                             } catch (e) {}
-                            $wire.notifyTokenCopied();
+                            window.dispatchEvent(new CustomEvent('client-toast', { detail: { message: 'Token de API copiado para a área de transferência.' } }));
                         })()
                     "
                     class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer shrink-0">

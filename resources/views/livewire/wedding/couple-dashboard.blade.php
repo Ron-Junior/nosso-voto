@@ -1,4 +1,80 @@
-<div class="space-y-6">
+<div class="space-y-6"
+     x-data="{
+         citiesMap: @js($citiesByState),
+         syncCityOptions(selectEl, uf, preferredCity = '') {
+             if (!selectEl) return;
+             const normalizedUf = String(uf || '').trim().toUpperCase();
+             const cities = this.citiesMap[normalizedUf] || [];
+             const currentCity = preferredCity !== '' ? preferredCity : ($wire.city || '');
+             selectEl.innerHTML = '';
+             const placeholder = document.createElement('option');
+             placeholder.value = '';
+             placeholder.textContent = cities.length === 0 ? 'Selecione o estado primeiro' : 'Selecione a cidade';
+             selectEl.appendChild(placeholder);
+             for (const cityName of cities) {
+                 const opt = document.createElement('option');
+                 opt.value = cityName;
+                 opt.textContent = cityName;
+                 selectEl.appendChild(opt);
+             }
+             selectEl.disabled = cities.length === 0;
+             if (cities.includes(currentCity)) {
+                 selectEl.value = currentCity;
+                 $wire.city = currentCity;
+             } else {
+                 selectEl.value = '';
+                 $wire.city = '';
+             }
+         },
+         openWeddingModal(data) {
+             $wire.partner_1_name = data.partner_1_name || '';
+             $wire.partner_2_name = data.partner_2_name || '';
+             $wire.wedding_date = data.wedding_date || null;
+             $wire.state = data.state || '';
+             $wire.city = data.city || '';
+             $wire.venue_name = data.venue_name ?? null;
+             $wire.estimated_budget = data.estimated_budget ?? '0.00';
+             $wire.showWeddingModal = true;
+             $nextTick(() => {
+                 this.syncCityOptions(this.$refs.modalCitySelect, $wire.state, data.city || '');
+             });
+         },
+         closeWeddingModal() {
+             $wire.showWeddingModal = false;
+         },
+         openNewVendor() {
+             $wire.editingVendorId = null;
+             $wire.vendor_name = '';
+             $wire.category = 'espaco';
+             $wire.contact_name = null;
+             $wire.contact_phone = null;
+             $wire.contact_email = null;
+             $wire.estimated_amount = '0.00';
+             $wire.contracted_amount = '0.00';
+             $wire.paid_amount = '0.00';
+             $wire.status = 'cotando';
+             $wire.notes = null;
+             $wire.showVendorModal = true;
+         },
+         openEditVendor(v) {
+             $wire.editingVendorId = v.id;
+             $wire.vendor_name = v.vendor_name || '';
+             $wire.category = v.category || 'espaco';
+             $wire.contact_name = v.contact_name ?? null;
+             $wire.contact_phone = v.contact_phone ?? null;
+             $wire.contact_email = v.contact_email ?? null;
+             $wire.estimated_amount = v.estimated_amount ?? '0.00';
+             $wire.contracted_amount = v.contracted_amount ?? '0.00';
+             $wire.paid_amount = v.paid_amount ?? '0.00';
+             $wire.status = v.status || 'cotando';
+             $wire.notes = v.notes ?? null;
+             $wire.showVendorModal = true;
+         },
+         closeVendorModal() {
+             $wire.showVendorModal = false;
+         }
+     }"
+     @keydown.escape.window="if ($wire.showVendorModal) { closeVendorModal(); } else if ($wire.showWeddingModal) { closeWeddingModal(); }">
     <x-toast :message="$statusMessage" />
 
     @if ($wedding === null)
@@ -86,7 +162,8 @@
                             Estado (UF)
                         </label>
                         <select id="onboard_state"
-                                wire:model.live="state"
+                                wire:model="state"
+                                @change="syncCityOptions($refs.onboardCitySelect, $el.value)"
                                 class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-3 min-h-[48px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                             <option value="">Selecione o estado</option>
                             @foreach ($states as $uf => $stateName)
@@ -103,6 +180,7 @@
                             Cidade
                         </label>
                         <select id="onboard_city"
+                                x-ref="onboardCitySelect"
                                 wire:model="city"
                                 @disabled(empty($citiesForSelectedState))
                                 class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-3 min-h-[48px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed">
@@ -135,7 +213,9 @@
 
                 <div class="flex justify-end">
                     <button type="submit"
-                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                            wire:loading.attr="disabled"
+                            wire:target="saveWedding"
+                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                         <span wire:loading.remove wire:target="saveWedding">Criar Planejamento do Casamento</span>
                         <span wire:loading wire:target="saveWedding">Salvando...</span>
                     </button>
@@ -195,18 +275,27 @@
 
                 <div class="flex flex-col sm:flex-row gap-2.5 shrink-0">
                     <a href="{{ route('inspirations.index') }}"
+                       wire:navigate.hover
                        class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
                         Inspirações Pinterest
                     </a>
 
                     <button type="button"
-                            wire:click="openWeddingModal"
+                            @click="openWeddingModal(@js([
+                                'partner_1_name' => $wedding->partner_1_name,
+                                'partner_2_name' => $wedding->partner_2_name,
+                                'wedding_date' => $wedding->wedding_date?->format('Y-m-d'),
+                                'state' => $wedding->state,
+                                'city' => $wedding->city,
+                                'venue_name' => $wedding->venue_name,
+                                'estimated_budget' => number_format((float) $wedding->estimated_budget, 2, '.', ''),
+                            ]))"
                             class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">
                         Editar Casamento
                     </button>
 
                     <button type="button"
-                            wire:click="openNewVendorModal"
+                            @click="openNewVendor()"
                             class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
                         + Novo Fornecedor
                     </button>
@@ -231,7 +320,9 @@
                 </div>
 
                 <button type="submit"
-                        class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer">
+                        wire:loading.attr="disabled"
+                        wire:target="saveBudget"
+                        class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                     <span wire:loading.remove wire:target="saveBudget">Atualizar Orçamento</span>
                     <span wire:loading wire:target="saveBudget">Salvando...</span>
                 </button>
@@ -322,7 +413,7 @@
                 </div>
 
                 <button type="button"
-                        wire:click="openNewVendorModal"
+                        @click="openNewVendor()"
                         class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer shrink-0">
                     + Adicionar Fornecedor
                 </button>
@@ -334,7 +425,7 @@
                     <label for="vendor_search" class="sr-only">Buscar fornecedor</label>
                     <input id="vendor_search"
                            type="search"
-                           wire:model.live.debounce.250ms="search"
+                           wire:model.live.debounce.350ms="search"
                            placeholder="Buscar por nome, contato ou nota..."
                            class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                 </div>
@@ -365,25 +456,26 @@
             </div>
 
             {{-- Scannable Mobile-First Vendor Cards --}}
-            @if ($vendors->isEmpty())
-                <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-8 text-center space-y-3">
-                    <p class="font-serif text-lg font-semibold text-[#2C2523]">
-                        {{ $allVendorsCount === 0 ? 'Nenhum fornecedor cadastrado ainda' : 'Nenhum fornecedor encontrado para este filtro' }}
-                    </p>
-                    <p class="text-sm text-[#6E625F] max-w-md mx-auto">
-                        {{ $allVendorsCount === 0
-                            ? 'Adicione seu primeiro fornecedor manualmente com teto previsto, valor fechado, pagamentos e link exclusivo de convite.'
-                            : 'Tente limpar a busca ou selecionar outra categoria/status.' }}
-                    </p>
-                    @if ($allVendorsCount === 0)
-                        <button type="button"
-                                wire:click="openNewVendorModal"
-                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
-                            Cadastrar Primeiro Fornecedor
-                        </button>
-                    @endif
-                </div>
-            @else
+            <div wire:loading.class="opacity-60 transition-opacity" wire:target="search,categoryFilter,statusFilter">
+                @if ($vendors->isEmpty())
+                    <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-8 text-center space-y-3">
+                        <p class="font-serif text-lg font-semibold text-[#2C2523]">
+                            {{ $allVendorsCount === 0 ? 'Nenhum fornecedor cadastrado ainda' : 'Nenhum fornecedor encontrado para este filtro' }}
+                        </p>
+                        <p class="text-sm text-[#6E625F] max-w-md mx-auto">
+                            {{ $allVendorsCount === 0
+                                ? 'Adicione seu primeiro fornecedor manualmente com teto previsto, valor fechado, pagamentos e link exclusivo de convite.'
+                                : 'Tente limpar a busca ou selecionar outra categoria/status.' }}
+                        </p>
+                        @if ($allVendorsCount === 0)
+                            <button type="button"
+                                    @click="openNewVendor()"
+                                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                                Cadastrar Primeiro Fornecedor
+                            </button>
+                        @endif
+                    </div>
+                @else
                 <div class="space-y-4">
                     @foreach ($vendors as $vendor)
                         @php
@@ -512,7 +604,7 @@
                                                             document.body.removeChild(el);
                                                         }
                                                     } catch (e) {}
-                                                    $wire.notifyInviteCopied(vendorName);
+                                                    window.dispatchEvent(new CustomEvent('client-toast', { detail: { message: 'Link de acesso de ' + vendorName + ' copiado para a área de transferência.' } }));
                                                 })()
                                             "
                                             class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-3.5 py-2 min-h-[44px] text-xs font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer">
@@ -521,12 +613,26 @@
 
                                     <button type="button"
                                             wire:click="regenerateVendorInviteToken({{ $vendor->id }})"
-                                            class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2 min-h-[44px] text-xs font-medium text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">
+                                            wire:loading.attr="disabled"
+                                            wire:target="regenerateVendorInviteToken({{ $vendor->id }})"
+                                            class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2 min-h-[44px] text-xs font-medium text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                                         Novo Link
                                     </button>
 
                                     <button type="button"
-                                            wire:click="editVendor({{ $vendor->id }})"
+                                            @click="openEditVendor(@js([
+                                                'id' => $vendor->id,
+                                                'vendor_name' => $vendor->vendor_name,
+                                                'category' => $vendor->category,
+                                                'contact_name' => $vendor->contact_name,
+                                                'contact_phone' => $vendor->contact_phone,
+                                                'contact_email' => $vendor->contact_email,
+                                                'estimated_amount' => number_format((float) $vendor->estimated_amount, 2, '.', ''),
+                                                'contracted_amount' => number_format((float) $vendor->contracted_amount, 2, '.', ''),
+                                                'paid_amount' => number_format((float) $vendor->paid_amount, 2, '.', ''),
+                                                'status' => $vendor->status,
+                                                'notes' => $vendor->notes,
+                                            ]))"
                                             class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-3.5 py-2 min-h-[44px] text-xs font-semibold text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">
                                         Editar
                                     </button>
@@ -534,7 +640,9 @@
                                     <button type="button"
                                             wire:click="deleteVendor({{ $vendor->id }})"
                                             wire:confirm="Tem certeza que deseja remover este fornecedor do orçamento?"
-                                            class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2 min-h-[44px] text-xs font-medium text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer">
+                                            wire:loading.attr="disabled"
+                                            wire:target="deleteVendor({{ $vendor->id }})"
+                                            class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2 min-h-[44px] text-xs font-medium text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                                         Excluir
                                     </button>
                                 </div>
@@ -542,7 +650,8 @@
                         </article>
                     @endforeach
                 </div>
-            @endif
+                @endif
+            </div>
         </section>
     @endif
 
@@ -560,7 +669,9 @@
 
             <button type="button"
                     wire:click="regenerateToken"
-                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0">
+                    wire:loading.attr="disabled"
+                    wire:target="regenerateToken"
+                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0 disabled:opacity-60 disabled:cursor-wait">
                 <span wire:loading.remove wire:target="regenerateToken">Gerar Novo Token</span>
                 <span wire:loading wire:target="regenerateToken">Gerando...</span>
             </button>
@@ -572,8 +683,11 @@
     </section>
 
     {{-- Edit Wedding Modal --}}
-    @if ($showWeddingModal)
-        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
+    @if ($wedding !== null || $showWeddingModal)
+        <div x-cloak
+             x-show="$wire.showWeddingModal"
+             @click.self="closeWeddingModal()"
+             class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
              role="dialog"
              aria-modal="true"
              aria-labelledby="wedding-modal-title">
@@ -583,7 +697,7 @@
                         Dados do Casamento
                     </h2>
                     <button type="button"
-                            wire:click="closeWeddingModal"
+                            @click="closeWeddingModal()"
                             aria-label="Fechar modal"
                             class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[#EAE0DA] text-[#6E625F] hover:text-[#2C2523] cursor-pointer">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -653,7 +767,8 @@
                                 Estado (UF)
                             </label>
                             <select id="modal_state"
-                                    wire:model.live="state"
+                                    wire:model="state"
+                                    @change="syncCityOptions($refs.modalCitySelect, $el.value)"
                                     class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                                 <option value="">Selecione o estado</option>
                                 @foreach ($states as $uf => $stateName)
@@ -670,6 +785,7 @@
                                 Cidade
                             </label>
                             <select id="modal_city"
+                                    x-ref="modalCitySelect"
                                     wire:model="city"
                                     @disabled(empty($citiesForSelectedState))
                                     class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed">
@@ -701,12 +817,14 @@
 
                     <div class="pt-3 border-t border-[#EAE0DA] flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
                         <button type="button"
-                                wire:click="closeWeddingModal"
+                                @click="closeWeddingModal()"
                                 class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-5 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] cursor-pointer">
                             Cancelar
                         </button>
                         <button type="submit"
-                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                                wire:loading.attr="disabled"
+                                wire:target="saveWedding"
+                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                             <span wire:loading.remove wire:target="saveWedding">Salvar Casamento</span>
                             <span wire:loading wire:target="saveWedding">Salvando...</span>
                         </button>
@@ -717,18 +835,23 @@
     @endif
 
     {{-- Create/Edit Vendor Modal --}}
-    @if ($showVendorModal)
-        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
+    @if ($wedding !== null || $showVendorModal)
+        <div x-cloak
+             x-show="$wire.showVendorModal"
+             @click.self="closeVendorModal()"
+             class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
              role="dialog"
              aria-modal="true"
              aria-labelledby="vendor-modal-title">
             <div class="w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-xl space-y-5">
                 <div class="flex items-center justify-between gap-3">
-                    <h2 id="vendor-modal-title" class="font-serif text-xl font-semibold text-[#2C2523]">
+                    <h2 id="vendor-modal-title"
+                        x-text="$wire.editingVendorId !== null ? 'Editar Fornecedor' : 'Novo Fornecedor / Contrato'"
+                        class="font-serif text-xl font-semibold text-[#2C2523]">
                         {{ $editingVendorId !== null ? 'Editar Fornecedor' : 'Novo Fornecedor / Contrato' }}
                     </h2>
                     <button type="button"
-                            wire:click="closeVendorModal"
+                            @click="closeVendorModal()"
                             aria-label="Fechar modal"
                             class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[#EAE0DA] text-[#6E625F] hover:text-[#2C2523] cursor-pointer">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -889,13 +1012,16 @@
 
                     <div class="pt-3 border-t border-[#EAE0DA] flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
                         <button type="button"
-                                wire:click="closeVendorModal"
+                                @click="closeVendorModal()"
                                 class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-5 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] cursor-pointer">
                             Cancelar
                         </button>
                         <button type="submit"
-                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
-                            <span wire:loading.remove wire:target="saveVendor">
+                                wire:loading.attr="disabled"
+                                wire:target="saveVendor"
+                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
+                            <span wire:loading.remove wire:target="saveVendor"
+                                  x-text="$wire.editingVendorId !== null ? 'Salvar Alterações' : 'Cadastrar Fornecedor'">
                                 {{ $editingVendorId !== null ? 'Salvar Alterações' : 'Cadastrar Fornecedor' }}
                             </span>
                             <span wire:loading wire:target="saveVendor">Salvando...</span>

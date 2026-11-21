@@ -51,6 +51,8 @@ class VendorWeddingAccess extends Component
 
     public string $statusMessage = '';
 
+    private ?WeddingVendor $cachedAccessVendor = null;
+
     public function mount(string $token): void
     {
         $this->token = $token;
@@ -141,6 +143,9 @@ class VendorWeddingAccess extends Component
         if ($this->editingVendorId !== null) {
             $vendor = $wedding->vendors()->findOrFail($this->editingVendorId);
             $vendor->update($payload);
+            if ($vendor->id === $accessVendor->id) {
+                $this->cachedAccessVendor = null;
+            }
             $message = "Fornecedor {$vendor->vendor_name} atualizado com sucesso.";
         } else {
             $vendor = $wedding->vendors()->create([
@@ -164,6 +169,9 @@ class VendorWeddingAccess extends Component
 
         $vendor = $accessVendor->wedding->vendors()->findOrFail($vendorId);
         $vendor->update(['status' => $status]);
+        if ($vendor->id === $accessVendor->id) {
+            $this->cachedAccessVendor = null;
+        }
 
         $this->notify("Status de {$vendor->vendor_name} atualizado para {$vendor->statusLabel()}.");
     }
@@ -186,12 +194,18 @@ class VendorWeddingAccess extends Component
         ];
 
         if ($isCerimonialista) {
-            $summary = $this->buildExecutiveSummary($wedding);
             $vendors = $this->filteredWeddingVendors($wedding);
+            $hasFilters = ($this->categoryFilter !== 'all' && in_array($this->categoryFilter, WeddingVendor::CATEGORIES, true))
+                || ($this->statusFilter !== 'all' && in_array($this->statusFilter, WeddingVendor::STATUSES, true))
+                || filled($this->search);
+
+            $summary = $hasFilters
+                ? $this->buildExecutiveSummary($wedding)
+                : $this->summarizeVendors($vendors);
         }
 
-        $settings = PlatformSetting::current();
         $supportsPinterestMoodboard = $accessVendor->supportsPinterestMoodboard();
+        $settings = $supportsPinterestMoodboard ? PlatformSetting::current() : null;
         $allowedPinterestCategories = $accessVendor->pinterestCategories();
         $pinterestCountsByCategory = [];
         $pinterestTotalCount = 0;
@@ -250,6 +264,10 @@ class VendorWeddingAccess extends Component
 
     private function resolveAccessVendor(): WeddingVendor
     {
+        if ($this->cachedAccessVendor !== null) {
+            return $this->cachedAccessVendor;
+        }
+
         $vendor = WeddingVendor::query()
             ->with('wedding')
             ->where('invite_token', $this->token)
@@ -257,7 +275,7 @@ class VendorWeddingAccess extends Component
 
         abort_if($vendor->wedding === null, 404);
 
-        return $vendor;
+        return $this->cachedAccessVendor = $vendor;
     }
 
     private function authorizeCerimonialistaAccess(): WeddingVendor
@@ -267,6 +285,36 @@ class VendorWeddingAccess extends Component
         abort_unless($vendor->isCerimonialista(), 403);
 
         return $vendor;
+    }
+
+    /**
+     * Compute contract counts and financial totals directly from an unfiltered vendor collection.
+     *
+     * @param  Collection<int, WeddingVendor>  $vendors
+     * @return array{
+     *     totalVendorsCount: int,
+     *     quotingCount: int,
+     *     contractedCount: int,
+     *     paidCount: int,
+     *     totalContracted: float,
+     *     totalPaid: float,
+     *     remainingToPay: float,
+     * }
+     */
+    private function summarizeVendors(Collection $vendors): array
+    {
+        $totalContracted = round((float) $vendors->sum('contracted_amount'), 2);
+        $totalPaid = round((float) $vendors->sum('paid_amount'), 2);
+
+        return [
+            'totalVendorsCount' => $vendors->count(),
+            'quotingCount' => $vendors->where('status', WeddingVendor::STATUS_QUOTING)->count(),
+            'contractedCount' => $vendors->where('status', WeddingVendor::STATUS_CONTRACTED)->count(),
+            'paidCount' => $vendors->where('status', WeddingVendor::STATUS_PAID)->count(),
+            'totalContracted' => $totalContracted,
+            'totalPaid' => $totalPaid,
+            'remainingToPay' => round($totalContracted - $totalPaid, 2),
+        ];
     }
 
     /**
@@ -284,15 +332,30 @@ class VendorWeddingAccess extends Component
      */
     private function buildExecutiveSummary(Wedding $wedding): array
     {
-        $allVendors = $wedding->vendors()->get(['status', 'contracted_amount', 'paid_amount']);
-        $totalContracted = round((float) $allVendors->sum('contracted_amount'), 2);
-        $totalPaid = round((float) $allVendors->sum('paid_amount'), 2);
+        $row = $wedding->vendors()
+            ->selectRaw(
+                'COUNT(*) as total_count,
+                COALESCE(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END), 0) as quoting_count,
+                COALESCE(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END), 0) as contracted_count,
+                COALESCE(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END), 0) as paid_count,
+                COALESCE(SUM(contracted_amount), 0) as total_contracted,
+                COALESCE(SUM(paid_amount), 0) as total_paid',
+                [
+                    WeddingVendor::STATUS_QUOTING,
+                    WeddingVendor::STATUS_CONTRACTED,
+                    WeddingVendor::STATUS_PAID,
+                ],
+            )
+            ->first();
+
+        $totalContracted = round((float) ($row->total_contracted ?? 0), 2);
+        $totalPaid = round((float) ($row->total_paid ?? 0), 2);
 
         return [
-            'totalVendorsCount' => $allVendors->count(),
-            'quotingCount' => $allVendors->where('status', WeddingVendor::STATUS_QUOTING)->count(),
-            'contractedCount' => $allVendors->where('status', WeddingVendor::STATUS_CONTRACTED)->count(),
-            'paidCount' => $allVendors->where('status', WeddingVendor::STATUS_PAID)->count(),
+            'totalVendorsCount' => (int) ($row->total_count ?? 0),
+            'quotingCount' => (int) ($row->quoting_count ?? 0),
+            'contractedCount' => (int) ($row->contracted_count ?? 0),
+            'paidCount' => (int) ($row->paid_count ?? 0),
             'totalContracted' => $totalContracted,
             'totalPaid' => $totalPaid,
             'remainingToPay' => round($totalContracted - $totalPaid, 2),

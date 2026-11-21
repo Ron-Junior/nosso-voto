@@ -5,6 +5,7 @@ namespace App\Livewire\Wedding;
 use App\Models\PinterestInspiration;
 use App\Models\PlatformSetting;
 use App\Models\User;
+use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,10 @@ class PinterestBoard extends Component
     public string $search = '';
 
     public string $statusMessage = '';
+
+    private ?Wedding $cachedWedding = null;
+
+    private bool $weddingLoaded = false;
 
     public function mount(): void
     {
@@ -110,6 +115,8 @@ class PinterestBoard extends Component
         ]);
 
         $wedding = $user->resolveOrCreateWedding();
+        $this->cachedWedding = $wedding;
+        $this->weddingLoaded = true;
 
         $payload = [
             'category' => $validated['category'],
@@ -150,7 +157,7 @@ class PinterestBoard extends Component
         $user = $this->authorizeCoupleAccess();
         $this->statusMessage = '';
 
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
         abort_if($wedding === null, 404);
 
         $inspiration = $wedding->pinterestInspirations()->findOrFail($inspirationId);
@@ -181,7 +188,7 @@ class PinterestBoard extends Component
     public function deleteInspiration(int $inspirationId): void
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         abort_if($wedding === null, 404);
 
@@ -198,7 +205,7 @@ class PinterestBoard extends Component
     public function toggleVendorPinterestAuthorization(int $vendorId): void
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         abort_if($wedding === null, 404);
 
@@ -233,7 +240,7 @@ class PinterestBoard extends Component
     public function render(): View
     {
         $user = $this->authorizeCoupleAccess();
-        $wedding = $user->wedding()->first();
+        $wedding = $this->resolveWedding($user);
 
         $inspirations = collect();
         $specialtyVendors = collect();
@@ -311,6 +318,16 @@ class PinterestBoard extends Component
         abort_unless($user !== null && ($user->isCouple() || $user->isAdmin()), 403);
 
         return $user;
+    }
+
+    private function resolveWedding(User $user): ?Wedding
+    {
+        if (! $this->weddingLoaded) {
+            $this->cachedWedding = $user->wedding()->first();
+            $this->weddingLoaded = true;
+        }
+
+        return $this->cachedWedding;
     }
 
     private function normalizeCategoryFilter(string $category): string

@@ -1,4 +1,51 @@
-<div class="space-y-6">
+<div class="space-y-6"
+     x-data="{
+         citiesMap: @js($citiesByState),
+         syncCityOptions(selectEl, uf, preferredCity = '') {
+             if (!selectEl) return;
+             const normalizedUf = String(uf || '').trim().toUpperCase();
+             const cities = this.citiesMap[normalizedUf] || [];
+             const currentCity = preferredCity !== '' ? preferredCity : ($wire.city || '');
+             selectEl.innerHTML = '';
+             const placeholder = document.createElement('option');
+             placeholder.value = '';
+             placeholder.textContent = cities.length === 0 ? 'Selecione o estado primeiro' : 'Selecione a cidade';
+             selectEl.appendChild(placeholder);
+             for (const cityName of cities) {
+                 const opt = document.createElement('option');
+                 opt.value = cityName;
+                 opt.textContent = cityName;
+                 selectEl.appendChild(opt);
+             }
+             selectEl.disabled = cities.length === 0;
+             if (cities.includes(currentCity)) {
+                 selectEl.value = currentCity;
+                 $wire.city = currentCity;
+             } else {
+                 selectEl.value = '';
+                 $wire.city = '';
+             }
+         },
+         openProfileModal(data) {
+             $wire.business_name = data.business_name || '';
+             $wire.profile_category = data.profile_category || 'fotografia';
+             $wire.state = data.state || 'SP';
+             $wire.city = data.city || '';
+             $wire.whatsapp = data.whatsapp || '';
+             $wire.instagram = data.instagram ?? null;
+             $wire.description = data.description ?? null;
+             $wire.cover_image_url = data.cover_image_url ?? null;
+             $wire.price_from = data.price_from ?? null;
+             $wire.showProfileModal = true;
+             $nextTick(() => {
+                 this.syncCityOptions(this.$refs.profileCitySelect, $wire.state, data.city || '');
+             });
+         },
+         closeProfileModal() {
+             $wire.showProfileModal = false;
+         }
+     }"
+     @keydown.escape.window="if ($wire.showProfileModal) closeProfileModal()">
     <x-toast :message="$statusMessage" />
 
     {{-- Header / Profile Card --}}
@@ -59,12 +106,23 @@
             <div class="flex flex-col sm:flex-row flex-wrap gap-2.5 shrink-0">
                 @if ($isVendorArea)
                     <button type="button"
-                            wire:click="openProfileModal"
+                            @click="openProfileModal(@js([
+                                'business_name' => $vendorProfile?->business_name ?? $user->name,
+                                'profile_category' => $vendorProfile?->category ?? 'fotografia',
+                                'state' => $vendorProfile?->state ?? 'SP',
+                                'city' => $vendorProfile?->city ?? '',
+                                'whatsapp' => $vendorProfile?->whatsapp ?? '',
+                                'instagram' => $vendorProfile?->instagram,
+                                'description' => $vendorProfile?->description,
+                                'cover_image_url' => $vendorProfile?->cover_image_url,
+                                'price_from' => $vendorProfile?->price_from !== null ? number_format((float) $vendorProfile->price_from, 2, '.', '') : null,
+                            ]))"
                             class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">
                         {{ $vendorProfile !== null ? 'Editar Perfil Profissional' : 'Configurar Perfil Profissional' }}
                     </button>
 
                     <a href="{{ route('vendor.schedule') }}"
+                       wire:navigate.hover
                        class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors">
                         Abrir Agenda de Noivos
                     </a>
@@ -72,6 +130,7 @@
 
                 @if ($user->isAdmin())
                     <a href="{{ route('admin.settings') }}"
+                       wire:navigate.hover
                        class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors shrink-0">
                         Abrir Configurações Globais
                     </a>
@@ -142,7 +201,9 @@
                                 @if ($linkedVendor->vendor_profile_id === null)
                                     <button type="button"
                                             wire:click="linkEmailWeddingToAgenda({{ $linkedVendor->id }})"
-                                            class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer">
+                                            wire:loading.attr="disabled"
+                                            wire:target="linkEmailWeddingToAgenda({{ $linkedVendor->id }})"
+                                            class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                                         Adicionar à Agenda
                                     </button>
                                 @elseif ($vendorProfile !== null && $linkedVendor->vendor_profile_id === $vendorProfile->id)
@@ -152,6 +213,7 @@
                                 @endif
 
                                 <a href="{{ route('vendor.wedding.access', $linkedVendor->invite_token) }}"
+                                   wire:navigate.hover
                                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors shrink-0">
                                     {{ $linkedVendor->isCerimonialista() ? 'Abrir Painel Consolidado' : 'Acessar Casamento' }}
                                 </a>
@@ -178,6 +240,7 @@
                 </div>
 
                 <a href="{{ route('vendor.schedule') }}"
+                   wire:navigate.hover
                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
                     Gerenciar na Agenda
                 </a>
@@ -253,7 +316,9 @@
 
             <button type="button"
                     wire:click="regenerateToken"
-                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0">
+                    wire:loading.attr="disabled"
+                    wire:target="regenerateToken"
+                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors cursor-pointer shrink-0 disabled:opacity-60 disabled:cursor-wait">
                 <span wire:loading.remove wire:target="regenerateToken">Gerar Novo Token</span>
                 <span wire:loading wire:target="regenerateToken">Gerando...</span>
             </button>
@@ -265,8 +330,11 @@
     </section>
 
     {{-- Edit Vendor Profile Modal --}}
-    @if ($showProfileModal)
-        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
+    @if ($isVendorArea || $showProfileModal)
+        <div x-cloak
+             x-show="$wire.showProfileModal"
+             @click.self="closeProfileModal()"
+             class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2C2523]/50 p-0 sm:p-4"
              role="dialog"
              aria-modal="true"
              aria-labelledby="vendor-profile-modal-title">
@@ -276,7 +344,7 @@
                         Perfil do Fornecedor
                     </h2>
                     <button type="button"
-                            wire:click="closeProfileModal"
+                            @click="closeProfileModal()"
                             aria-label="Fechar modal"
                             class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[#EAE0DA] text-[#6E625F] hover:text-[#2C2523] cursor-pointer">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -336,7 +404,8 @@
                                 Estado (UF)
                             </label>
                             <select id="profile_state"
-                                    wire:model.live="state"
+                                    wire:model="state"
+                                    @change="syncCityOptions($refs.profileCitySelect, $el.value)"
                                     class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
                                 <option value="">Selecione o estado</option>
                                 @foreach ($states as $uf => $stateName)
@@ -353,6 +422,7 @@
                                 Cidade
                             </label>
                             <select id="profile_city"
+                                    x-ref="profileCitySelect"
                                     wire:model="city"
                                     @disabled(empty($citiesForSelectedState))
                                     class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed">
@@ -429,12 +499,14 @@
 
                     <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
                         <button type="button"
-                                wire:click="closeProfileModal"
+                                @click="closeProfileModal()"
                                 class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-5 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] cursor-pointer">
                             Cancelar
                         </button>
                         <button type="submit"
-                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                                wire:loading.attr="disabled"
+                                wire:target="saveVendorProfile"
+                                class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                             <span wire:loading.remove wire:target="saveVendorProfile">Salvar Perfil</span>
                             <span wire:loading wire:target="saveVendorProfile">Salvando...</span>
                         </button>

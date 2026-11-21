@@ -19,6 +19,8 @@ php_serve(
     build,
     name = "nosso-voto",
     build_post = [
+        run("composer dump-autoload --optimize --no-interaction"),
+        run("php artisan package:discover --ansi"),
         run("php artisan config:clear"),
     ],
     commands = {

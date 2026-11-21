@@ -75,6 +75,10 @@ class UserPanel extends Component
 
     public string $search = '';
 
+    private ?VendorProfile $cachedVendorProfile = null;
+
+    private bool $vendorProfileLoaded = false;
+
     public function mount(): void
     {
         $user = Auth::user();
@@ -83,7 +87,7 @@ class UserPanel extends Component
             return;
         }
 
-        $profile = $user->vendorProfile()->first();
+        $profile = $this->resolveVendorProfile($user);
 
         if ($profile !== null) {
             $this->fillProfileForm($profile);
@@ -99,7 +103,7 @@ class UserPanel extends Component
         $user = $this->authorizeVendorAccess();
         $this->statusMessage = '';
 
-        $profile = $user->vendorProfile()->first();
+        $profile = $this->resolveVendorProfile($user);
 
         if ($profile !== null) {
             $this->fillProfileForm($profile);
@@ -175,7 +179,7 @@ class UserPanel extends Component
             'price_from' => filled($validated['price_from']) ? $validated['price_from'] : null,
         ];
 
-        $profile = $user->vendorProfile()->first();
+        $profile = $this->resolveVendorProfile($user);
 
         if ($profile !== null) {
             $profile->update($payload);
@@ -190,6 +194,8 @@ class UserPanel extends Component
 
         $freshProfile = $profile->fresh();
         $user->setRelation('vendorProfile', $freshProfile);
+        $this->cachedVendorProfile = $freshProfile;
+        $this->vendorProfileLoaded = true;
 
         $this->fillProfileForm($freshProfile);
         $this->showProfileModal = false;
@@ -419,7 +425,7 @@ class UserPanel extends Component
     {
         $user = Auth::user();
         $isVendorArea = $user !== null && $this->canManageVendorArea($user);
-        $vendorProfile = $isVendorArea ? $user->vendorProfile()->first() : null;
+        $vendorProfile = $isVendorArea ? $this->resolveVendorProfile($user) : null;
 
         $scheduleEntries = collect();
         $scheduleSummary = [
@@ -442,15 +448,16 @@ class UserPanel extends Component
         return [
             'user' => $user,
             'isVendorArea' => $isVendorArea,
-            'settings' => PlatformSetting::current(),
+            'settings' => $includeScheduleEntries ? null : PlatformSetting::current(),
             'vendorProfile' => $vendorProfile,
             'scheduleEntries' => $scheduleEntries,
             'scheduleSummary' => $scheduleSummary,
-            'linkedWeddingVendors' => $this->resolveLinkedWeddingVendors($user),
+            'linkedWeddingVendors' => $includeScheduleEntries ? collect() : $this->resolveLinkedWeddingVendors($user),
             'categoryLabels' => WeddingVendor::categoryLabels(),
             'statusLabels' => WeddingVendor::statusLabels(),
-            'states' => BrazilLocations::states(),
-            'citiesForSelectedState' => BrazilLocations::citiesForState($this->state),
+            'states' => $includeScheduleEntries ? [] : BrazilLocations::states(),
+            'citiesForSelectedState' => $includeScheduleEntries ? [] : BrazilLocations::citiesForState($this->state),
+            'citiesByState' => $includeScheduleEntries ? [] : BrazilLocations::allCitiesByState(),
         ];
     }
 
@@ -468,10 +475,20 @@ class UserPanel extends Component
         return $user;
     }
 
+    private function resolveVendorProfile(User $user): ?VendorProfile
+    {
+        if (! $this->vendorProfileLoaded) {
+            $this->cachedVendorProfile = $user->vendorProfile()->first();
+            $this->vendorProfileLoaded = true;
+        }
+
+        return $this->cachedVendorProfile;
+    }
+
     private function requireVendorProfile(): VendorProfile
     {
         $user = $this->authorizeVendorAccess();
-        $profile = $user->vendorProfile()->first();
+        $profile = $this->resolveVendorProfile($user);
 
         abort_if($profile === null, 404);
 
@@ -480,7 +497,7 @@ class UserPanel extends Component
 
     private function resolveOrCreateVendorProfile(User $user): VendorProfile
     {
-        $profile = $user->vendorProfile()->first();
+        $profile = $this->resolveVendorProfile($user);
 
         if ($profile !== null) {
             return $profile;
@@ -513,6 +530,8 @@ class UserPanel extends Component
 
         $freshProfile = $profile->fresh();
         $user->setRelation('vendorProfile', $freshProfile);
+        $this->cachedVendorProfile = $freshProfile;
+        $this->vendorProfileLoaded = true;
         $this->fillProfileForm($freshProfile);
 
         return $freshProfile;

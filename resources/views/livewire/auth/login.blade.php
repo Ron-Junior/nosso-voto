@@ -54,7 +54,9 @@
             </label>
 
             <button type="submit"
-                    class="w-full inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                    wire:loading.attr="disabled"
+                    wire:target="login"
+                    class="w-full inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-6 py-3 min-h-[48px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
                 <span wire:loading.remove wire:target="login">Entrar no Painel</span>
                 <span wire:loading wire:target="login">Autenticando...</span>
             </button>
@@ -62,7 +64,7 @@
 
         <p class="text-center text-sm text-[#6E625F]">
             Ainda não tem conta?
-            <a href="{{ route('register') }}" class="font-semibold text-[#C25E38] hover:text-[#A84D2B] underline underline-offset-4">
+            <a href="{{ route('register') }}" wire:navigate.hover class="font-semibold text-[#C25E38] hover:text-[#A84D2B] underline underline-offset-4">
                 Criar conta agora
             </a>
         </p>
