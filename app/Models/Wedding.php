@@ -88,6 +88,16 @@ class Wedding extends Model
         return $this->hasMany(WeddingVendor::class);
     }
 
+    public function pinterestInspirations(): HasMany
+    {
+        return $this->hasMany(PinterestInspiration::class);
+    }
+
+    public function inspirations(): HasMany
+    {
+        return $this->hasMany(PinterestInspiration::class);
+    }
+
     public function coupleTitle(): string
     {
         return trim("{$this->partner_1_name} & {$this->partner_2_name}");

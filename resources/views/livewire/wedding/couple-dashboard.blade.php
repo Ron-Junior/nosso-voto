@@ -194,6 +194,11 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2.5 shrink-0">
+                    <a href="{{ route('inspirations.index') }}"
+                       class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
+                        Inspirações Pinterest
+                    </a>
+
                     <button type="button"
                             wire:click="openWeddingModal"
                             class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors cursor-pointer">

@@ -143,6 +143,46 @@ class WeddingVendor extends Model
         return $this->category === 'cerimonialista';
     }
 
+    /**
+     * Pinterest inspiration categories visible for this vendor's specialty.
+     *
+     * @return list<string>
+     */
+    public function pinterestCategories(): array
+    {
+        return match ($this->category) {
+            'decoracao' => [PinterestInspiration::CATEGORY_DECORACAO],
+            'maquiagem', 'penteado' => [
+                PinterestInspiration::CATEGORY_MAQUIAGEM,
+                PinterestInspiration::CATEGORY_PENTEADO,
+            ],
+            default => [],
+        };
+    }
+
+    public function supportsPinterestMoodboard(): bool
+    {
+        return $this->pinterestCategories() !== [];
+    }
+
+    public function requiresPinterestPaywallUnlock(?PlatformSetting $setting = null): bool
+    {
+        if (! $this->supportsPinterestMoodboard() || ! $this->is_pinterest_authorized) {
+            return false;
+        }
+
+        $activeSetting = $setting ?? PlatformSetting::current();
+
+        return $activeSetting->paywall_pinterest_inspirations_enabled && ! $this->has_paid_pinterest_unlock;
+    }
+
+    public function canViewPinterestInspirations(?PlatformSetting $setting = null): bool
+    {
+        return $this->supportsPinterestMoodboard()
+            && $this->is_pinterest_authorized
+            && ! $this->requiresPinterestPaywallUnlock($setting);
+    }
+
     public static function extractPhoneDigits(?string $phone): string
     {
         if (blank($phone)) {

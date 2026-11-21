@@ -269,4 +269,3 @@ class BrazilLocations
         return in_array(trim($city), self::citiesForState($state), true);
     }
 }
-

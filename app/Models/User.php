@@ -116,6 +116,41 @@ class User extends Authenticatable
         return $this->hasOne(Wedding::class);
     }
 
+    /**
+     * Return the user's wedding or provision a default record when saving early inspirations.
+     */
+    public function resolveOrCreateWedding(): Wedding
+    {
+        $existing = $this->wedding()->first();
+
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        $partner1 = trim((string) $this->name);
+        $partner2 = 'A definir';
+
+        if (str_contains($partner1, '&')) {
+            [$first, $second] = array_map('trim', explode('&', $partner1, 2));
+            $partner1 = $first !== '' ? $first : $partner1;
+            $partner2 = $second !== '' ? $second : $partner2;
+        }
+
+        $wedding = Wedding::query()->create([
+            'user_id' => $this->id,
+            'partner_1_name' => $partner1 !== '' ? $partner1 : 'Noivo(a) 1',
+            'partner_2_name' => $partner2,
+            'city' => 'São Paulo',
+            'state' => 'SP',
+            'estimated_budget' => 0,
+        ]);
+
+        $fresh = $wedding->fresh();
+        $this->setRelation('wedding', $fresh);
+
+        return $fresh;
+    }
+
     public function vendorProfile(): HasOne
     {
         return $this->hasOne(VendorProfile::class);

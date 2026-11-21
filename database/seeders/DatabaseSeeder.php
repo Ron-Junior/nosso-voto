@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\PinterestInspiration;
 use App\Models\PlatformSetting;
 use App\Models\User;
 use App\Models\Wedding;
@@ -118,6 +119,46 @@ class DatabaseSeeder extends Seeder
                         'vendor_profile_id' => null,
                         'invite_token' => WeddingVendor::generateUniqueInviteToken(),
                     ],
+                );
+            }
+
+            $demoInspirations = [
+                [
+                    'category' => PinterestInspiration::CATEGORY_DECORACAO,
+                    'type' => PinterestInspiration::TYPE_BOARD,
+                    'title' => 'Cerimônia Terracota & Flores Secas',
+                    'pinterest_url' => 'https://br.pinterest.com/anaelucas/cerimonia-terracota-flores-secas/',
+                    'image_url' => null,
+                    'bride_notes' => 'Paleta quente para o altar ao pôr do sol com folhagens secas e velas.',
+                    'source' => PinterestInspiration::SOURCE_WEB,
+                ],
+                [
+                    'category' => PinterestInspiration::CATEGORY_MAQUIAGEM,
+                    'type' => PinterestInspiration::TYPE_PIN,
+                    'title' => 'Make Glow Natural com Delineado Suave',
+                    'pinterest_url' => 'https://br.pinterest.com/pin/987654321001/',
+                    'image_url' => null,
+                    'bride_notes' => 'Pele iluminada e batom nude rosado para durar até o fim da festa.',
+                    'source' => PinterestInspiration::SOURCE_CHROME_EXTENSION,
+                ],
+                [
+                    'category' => PinterestInspiration::CATEGORY_PENTEADO,
+                    'type' => PinterestInspiration::TYPE_PIN,
+                    'title' => 'Coque Baixo Desconstruído com Grinalda',
+                    'pinterest_url' => 'https://br.pinterest.com/pin/987654321002/',
+                    'image_url' => null,
+                    'bride_notes' => 'Mechas soltas na frente para emoldurar o rosto e combinar com o véu.',
+                    'source' => PinterestInspiration::SOURCE_PWA_SHARE,
+                ],
+            ];
+
+            foreach ($demoInspirations as $inspirationData) {
+                PinterestInspiration::query()->firstOrCreate(
+                    [
+                        'wedding_id' => $wedding->id,
+                        'pinterest_url' => $inspirationData['pinterest_url'],
+                    ],
+                    $inspirationData,
                 );
             }
         }

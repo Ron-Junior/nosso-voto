@@ -61,6 +61,14 @@
                                 </svg>
                                 <span>Painel dos Noivos</span>
                             </a>
+
+                            <a href="{{ route('inspirations.index') }}"
+                               class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 min-h-[44px] text-sm font-medium transition-colors {{ request()->routeIs('inspirations.*') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F] hover:bg-[#FBF9F7] hover:text-[#2C2523]' }}">
+                                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+                                </svg>
+                                <span>Inspirações Pinterest</span>
+                            </a>
                         @endif
 
                         @if ($user->isVendor() || $user->isAdmin())
@@ -180,7 +188,7 @@
     {{-- Mobile-first Fixed Bottom Navigation --}}
     @if ($user)
         <nav class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-[#FFFFFF] border-t border-[#EAE0DA] shadow-[0_-4px_20px_rgba(44,37,35,0.06)]" aria-label="Navegação móvel">
-            <div class="grid {{ ($user->isAdmin() || $user->isVendor()) ? 'grid-cols-4' : 'grid-cols-3' }} gap-1 px-2 py-1.5">
+            <div class="grid {{ $user->isAdmin() ? 'grid-cols-5' : 'grid-cols-4' }} gap-1 px-2 py-1.5">
                 <a href="{{ route('home') }}"
                    class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('home') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -196,6 +204,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6Z" />
                         </svg>
                         <span>Painel Noivos</span>
+                    </a>
+
+                    <a href="{{ route('inspirations.index') }}"
+                       class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('inspirations.*') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                        </svg>
+                        <span>Inspirações</span>
                     </a>
                 @endif
 

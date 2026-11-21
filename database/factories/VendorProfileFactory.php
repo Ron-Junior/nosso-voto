@@ -43,4 +43,3 @@ class VendorProfileFactory extends Factory
         ];
     }
 }
-

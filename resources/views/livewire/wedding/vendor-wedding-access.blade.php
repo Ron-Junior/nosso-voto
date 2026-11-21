@@ -582,6 +582,154 @@
                 Este link exibe exclusivamente os detalhes do seu serviço para este casamento. A visão consolidada dos demais fornecedores é restrita à assessoria/cerimonialista do casal.
             </p>
         </section>
+
+        @if ($supportsPinterestMoodboard)
+            <section class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 shadow-sm space-y-5" aria-label="Moodboard de inspirações do Pinterest">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-[#C25E38]">
+                            Moodboard Segmentado • Pinterest
+                        </p>
+                        <h2 class="font-serif text-xl font-semibold text-[#2C2523]">
+                            Inspirações da Noiva para {{ $accessVendor->categoryLabel() }}
+                        </h2>
+                        <p class="text-sm text-[#6E625F]">
+                            Referências de
+                            @if ($accessVendor->category === 'decoracao')
+                                <strong class="font-medium text-[#2C2523]">Decoração</strong>
+                            @else
+                                <strong class="font-medium text-[#2C2523]">Maquiagem</strong> e <strong class="font-medium text-[#2C2523]">Penteado</strong>
+                            @endif
+                            salvas para o grande dia.
+                        </p>
+                    </div>
+
+                    <div class="inline-flex items-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-3.5 py-2 text-xs font-semibold tabular-nums text-[#2C2523] shrink-0">
+                        {{ $pinterestTotalCount }} {{ $pinterestTotalCount === 1 ? 'referência salva' : 'referências salvas' }}
+                    </div>
+                </div>
+
+                @if (! $accessVendor->is_pinterest_authorized)
+                    <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-6 text-center space-y-2">
+                        <p class="font-serif text-base font-semibold text-[#2C2523]">
+                            Acesso ao moodboard não autorizado no momento
+                        </p>
+                        <p class="text-sm text-[#6E625F] max-w-md mx-auto">
+                            Os noivos ainda não liberaram ou pausaram temporariamente a visualização das inspirações do Pinterest para este link.
+                        </p>
+                    </div>
+                @elseif ($requiresPinterestUnlock)
+                    <div data-pinterest-paywall
+                         class="rounded-2xl border border-[#C25E38]/40 bg-[#F9EBE6]/50 p-6 space-y-4">
+                        <div class="space-y-2">
+                            <span class="inline-flex items-center rounded-lg bg-[#FFFFFF] border border-[#C25E38]/30 px-2.5 py-1 text-xs font-semibold text-[#C25E38]">
+                                Desbloqueio de Moodboard Ativo
+                            </span>
+                            <h3 class="font-serif text-lg font-semibold text-[#2C2523]">
+                                {{ $pinterestTotalCount }} {{ $pinterestTotalCount === 1 ? 'referência pronta' : 'referências prontas' }} para você visualizar
+                            </h3>
+                            <p class="text-sm text-[#6E625F]">
+                                A noiva salvou referências visuais e observações específicas para este casamento. Desbloqueie este moodboard para acessar os links dos pins e pastas.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($allowedPinterestCategories as $allowedCat)
+                                <span class="inline-flex items-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3 py-1.5 text-xs font-semibold tabular-nums text-[#2C2523]">
+                                    {{ $inspirationCategoryLabels[$allowedCat] ?? $allowedCat }}: {{ $pinterestCountsByCategory[$allowedCat] ?? 0 }}
+                                </span>
+                            @endforeach
+                        </div>
+
+                        <div>
+                            <button type="button"
+                                    wire:click="unlockPinterestMoodboard"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-3 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer">
+                                <span wire:loading.remove wire:target="unlockPinterestMoodboard">Desbloquear Inspirações do Pinterest</span>
+                                <span wire:loading wire:target="unlockPinterestMoodboard">Desbloqueando...</span>
+                            </button>
+                        </div>
+                    </div>
+                @elseif ($canViewPinterestInspirations)
+                    @if (count($allowedPinterestCategories) > 1)
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button"
+                                    wire:click="selectInspirationCategory('all')"
+                                    class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer {{ $inspirationCategoryFilter === 'all' ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                                <span>Todas</span>
+                                <span class="tabular-nums">({{ $pinterestTotalCount }})</span>
+                            </button>
+
+                            @foreach ($allowedPinterestCategories as $allowedCat)
+                                <button type="button"
+                                        wire:click="selectInspirationCategory('{{ $allowedCat }}')"
+                                        class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 min-h-[44px] text-xs font-semibold transition-colors cursor-pointer {{ $inspirationCategoryFilter === $allowedCat ? 'bg-[#C25E38] text-white' : 'border border-[#EAE0DA] bg-[#FBF9F7] text-[#6E625F] hover:border-[#C25E38] hover:text-[#C25E38]' }}">
+                                    <span>{{ $inspirationCategoryLabels[$allowedCat] ?? $allowedCat }}</span>
+                                    <span class="tabular-nums">({{ $pinterestCountsByCategory[$allowedCat] ?? 0 }})</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if ($pinterestInspirations->isEmpty())
+                        <div class="rounded-2xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-6 text-center space-y-1.5">
+                            <p class="font-serif text-base font-semibold text-[#2C2523]">
+                                Nenhuma referência salva nesta especialidade ainda
+                            </p>
+                            <p class="text-sm text-[#6E625F]">
+                                Assim que a noiva salvar pins ou pastas do Pinterest para este tema, eles aparecerão aqui automaticamente.
+                            </p>
+                        </div>
+                    @else
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($pinterestInspirations as $inspiration)
+                                <article wire:key="vendor-inspiration-{{ $inspiration->id }}"
+                                         class="flex flex-col rounded-2xl border border-[#EAE0DA] bg-[#FBF9F7] overflow-hidden">
+                                    @if (filled($inspiration->image_url))
+                                        <div class="aspect-[4/3] w-full overflow-hidden bg-[#FFFFFF] border-b border-[#EAE0DA]">
+                                            <img src="{{ $inspiration->image_url }}"
+                                                 alt="{{ $inspiration->title }}"
+                                                 loading="lazy"
+                                                 class="h-full w-full object-cover">
+                                        </div>
+                                    @endif
+
+                                    <div class="flex-1 p-4 flex flex-col justify-between gap-3">
+                                        <div class="space-y-2">
+                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                <span class="inline-flex items-center rounded-lg bg-[#F9EBE6] px-2.5 py-1 text-xs font-semibold text-[#C25E38]">
+                                                    {{ $inspiration->categoryLabel() }}
+                                                </span>
+                                                <span class="inline-flex items-center rounded-lg border border-[#EAE0DA] bg-[#FFFFFF] px-2.5 py-1 text-xs font-medium text-[#2C2523]">
+                                                    {{ $inspiration->typeLabel() }}
+                                                </span>
+                                            </div>
+
+                                            <h3 class="font-serif text-base font-semibold text-[#2C2523]">
+                                                {{ $inspiration->title }}
+                                            </h3>
+
+                                            @if (filled($inspiration->bride_notes))
+                                                <p class="rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] p-3 text-sm text-[#6E625F] leading-relaxed">
+                                                    {{ $inspiration->bride_notes }}
+                                                </p>
+                                            @endif
+                                        </div>
+
+                                        <a href="{{ $inspiration->pinterest_url }}"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-xs font-semibold text-white hover:bg-[#A84D2B] transition-colors">
+                                            Abrir no Pinterest
+                                        </a>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                @endif
+            </section>
+        @endif
     @endif
 </div>
 

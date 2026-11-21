@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Wedding;
 
+use App\Models\PinterestInspiration;
+use App\Models\PlatformSetting;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Contracts\View\View;
@@ -44,6 +46,8 @@ class VendorWeddingAccess extends Component
     public string $statusFilter = 'all';
 
     public string $search = '';
+
+    public string $inspirationCategoryFilter = 'all';
 
     public string $statusMessage = '';
 
@@ -93,6 +97,39 @@ class VendorWeddingAccess extends Component
     public function updatedSearch(): void
     {
         $this->statusMessage = '';
+    }
+
+    public function updatedInspirationCategoryFilter(): void
+    {
+        $this->statusMessage = '';
+    }
+
+    public function selectInspirationCategory(string $category): void
+    {
+        $accessVendor = $this->resolveAccessVendor();
+        $allowed = $accessVendor->pinterestCategories();
+
+        $this->statusMessage = '';
+        $this->inspirationCategoryFilter = in_array($category, $allowed, true) ? $category : 'all';
+    }
+
+    public function payPinterestUnlock(): void
+    {
+        $this->unlockPinterestMoodboard();
+    }
+
+    public function unlockPinterestMoodboard(): void
+    {
+        $accessVendor = $this->resolveAccessVendor();
+
+        abort_unless(
+            $accessVendor->supportsPinterestMoodboard() && $accessVendor->is_pinterest_authorized,
+            403,
+        );
+
+        $accessVendor->forceFill(['has_paid_pinterest_unlock' => true])->save();
+
+        $this->notify('Acesso às inspirações do Pinterest desbloqueado com sucesso.');
     }
 
     public function saveVendor(): void
@@ -153,6 +190,43 @@ class VendorWeddingAccess extends Component
             $vendors = $this->filteredWeddingVendors($wedding);
         }
 
+        $settings = PlatformSetting::current();
+        $supportsPinterestMoodboard = $accessVendor->supportsPinterestMoodboard();
+        $allowedPinterestCategories = $accessVendor->pinterestCategories();
+        $pinterestCountsByCategory = [];
+        $pinterestTotalCount = 0;
+        $pinterestInspirations = collect();
+        $requiresPinterestUnlock = false;
+        $canViewPinterestInspirations = false;
+
+        if ($supportsPinterestMoodboard) {
+            $groupedCounts = $wedding->pinterestInspirations()
+                ->whereIn('category', $allowedPinterestCategories)
+                ->selectRaw('category, COUNT(*) as total')
+                ->groupBy('category')
+                ->pluck('total', 'category');
+
+            foreach ($allowedPinterestCategories as $cat) {
+                $pinterestCountsByCategory[$cat] = (int) ($groupedCounts[$cat] ?? 0);
+            }
+
+            $pinterestTotalCount = array_sum($pinterestCountsByCategory);
+            $requiresPinterestUnlock = $accessVendor->requiresPinterestPaywallUnlock($settings);
+            $canViewPinterestInspirations = $accessVendor->canViewPinterestInspirations($settings);
+
+            if ($canViewPinterestInspirations) {
+                $inspirationsQuery = $wedding->pinterestInspirations()
+                    ->whereIn('category', $allowedPinterestCategories)
+                    ->latest('id');
+
+                if (count($allowedPinterestCategories) > 1 && in_array($this->inspirationCategoryFilter, $allowedPinterestCategories, true)) {
+                    $inspirationsQuery->where('category', $this->inspirationCategoryFilter);
+                }
+
+                $pinterestInspirations = $inspirationsQuery->get();
+            }
+        }
+
         return view('livewire.wedding.vendor-wedding-access', [
             'accessVendor' => $accessVendor,
             'wedding' => $wedding,
@@ -161,6 +235,15 @@ class VendorWeddingAccess extends Component
             'daysUntilWedding' => $wedding->daysUntilWedding(),
             'categoryLabels' => WeddingVendor::categoryLabels(),
             'statusLabels' => WeddingVendor::statusLabels(),
+            'settings' => $settings,
+            'supportsPinterestMoodboard' => $supportsPinterestMoodboard,
+            'allowedPinterestCategories' => $allowedPinterestCategories,
+            'pinterestCountsByCategory' => $pinterestCountsByCategory,
+            'pinterestTotalCount' => $pinterestTotalCount,
+            'pinterestInspirations' => $pinterestInspirations,
+            'requiresPinterestUnlock' => $requiresPinterestUnlock,
+            'canViewPinterestInspirations' => $canViewPinterestInspirations,
+            'inspirationCategoryLabels' => PinterestInspiration::categoryLabels(),
             ...$summary,
         ]);
     }
@@ -331,4 +414,3 @@ class VendorWeddingAccess extends Component
         $this->dispatch('toast', message: $message);
     }
 }
-
