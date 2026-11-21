@@ -20,6 +20,7 @@
 </head>
 <body class="min-h-screen bg-[#FBF9F7] text-[#2C2523] font-sans antialiased selection:bg-[#F9EBE6] selection:text-[#C25E38]">
     <div class="min-h-screen flex flex-col lg:flex-row">
+        {{-- Desktop Sidebar --}}
         @if ($user)
             <aside class="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 bg-[#FFFFFF] border-r border-[#EAE0DA] z-30">
                 <div class="flex flex-col h-full px-6 py-6">
