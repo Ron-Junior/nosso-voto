@@ -67,12 +67,12 @@ A arquitetura e o escopo priorizam um **MVP enxuto para desenvolvedor solo**, co
 
 | Perfil | Responsabilidades e Recursos |
 | :--- | :--- |
-| **Noivos / Casal** | • **Orçamento Integrado aos Fornecedores:** definição de orçamento pretendido total; cada fornecedor registra *Teto Previsto*, *Valor Fechado* e *Valor Pago*, alimentando indicadores de *Orçamento vs. Gasto* e alertas de estouro.<br>• **Checklist & Lista do Grande Dia:** lista organizada por categorias de tudo o que o casal precisa para o casamento (itens físicos, trajes, documentação e preparativos), podendo marcar o que **já tem**, o que está **completando aos poucos** (com controle de quantidades, ex.: *15 de 30 lembrancinhas*) e o que **ainda falta**, com barra de progresso geral.<br>• **Autonomia Total de Cadastro:** podem vincular fornecedores da Vitrine **ou cadastrar manualmente qualquer fornecedor externo que não use a plataforma** (registrando valores, parcelas, contato e observações do contrato).<br>• **Links de Convite:** geração opcional de link exclusivo para convidar o profissional a colaborar.<br>• **Central de Inspirações Pinterest:** pastas organizadas por *Decoração*, *Maquiagem*, *Penteado* e *Fotografia (inspirações de fotos)* + notas da noiva.<br>• **Lista de Presentes & Carteira Pix:** criação de cotas, escolha da regra de taxa, mural de recados e solicitação de resgate via Pix. |
-| **Cerimonialista** | • **Visão Consolidada e Colaborativa:** acessa pelo link de convite a lista unificada de todos os fornecedores do casal, seus status (*Em Cotação*, *Contratado*, *Quitado*), contatos e observações, podendo **atualizar status, contatos e adicionar notas/fornecedores** para apoiar os noivos, além de acompanhar e conferir os itens da lista do grande dia junto aos noivos. |
+| **Noivos / Casal** | • **Orçamento Integrado aos Fornecedores:** definição de orçamento pretendido total; cada fornecedor registra *Teto Previsto*, *Valor Fechado* e *Valor Pago*, alimentando indicadores de *Orçamento vs. Gasto* e alertas de estouro.<br>• **Checklist & Lista do Grande Dia:** lista organizada por categorias de tudo o que o casal precisa para o casamento (itens físicos, trajes, documentação e preparativos), podendo marcar o que **já tem**, o que está **completando aos poucos** (com controle de quantidades, ex.: *15 de 30 lembrancinhas*) e o que **ainda falta**, com barra de progresso geral.<br>• **Calendário de Planejamento:** visualização em grade mensal e lista unificando a data do Grande Dia, compromissos do casamento (reuniões, degustações, provas, pagamentos e documentos) e prazos do checklist.<br>• **Autonomia Total de Cadastro:** podem vincular fornecedores da Vitrine **ou cadastrar manualmente qualquer fornecedor externo que não use a plataforma** (registrando valores, parcelas, contato e observações do contrato).<br>• **Links de Convite:** geração opcional de link exclusivo para convidar o profissional a colaborar.<br>• **Central de Inspirações Pinterest:** pastas organizadas por *Decoração*, *Maquiagem*, *Penteado* e *Fotografia (inspirações de fotos)* + notas da noiva.<br>• **Lista de Presentes & Carteira Pix:** criação de cotas, escolha da regra de taxa, mural de recados e solicitação de resgate via Pix. |
+| **Cerimonialista** | • **Visão Consolidada e Colaborativa:** acessa pelo link de convite a lista unificada de todos os fornecedores do casal, seus status (*Em Cotação*, *Contratado*, *Quitado*), contatos e observações, podendo **atualizar status, contatos e adicionar notas/fornecedores** para apoiar os noivos, acompanhar e conferir os itens da lista do grande dia e colaborar no **Calendário do Casamento** (criando, editando e concluindo compromissos junto aos noivos). |
 | **Decorador** | • Visualiza o moodboard de **Decoração** salvo pela noiva no Pinterest (respeitando autorização do casal e a feature flag global de paywall). |
 | **Maquiadora e Penteadista** | • Visualizam o moodboard de **Maquiagem** e **Penteado** salvo pela noiva no Pinterest, com observações e links originais dos pins. |
 | **Fotógrafo** | • Visualiza o moodboard de **Fotografia** (inspirações de fotos, poses e enquadramentos) salvo pela noiva no Pinterest (respeitando autorização do casal e a feature flag global de paywall). |
-| **Fornecedor (Portal & Agenda)** | • **Áreas de Atuação no Cadastro:** seleção obrigatória de uma ou **múltiplas áreas de atuação** desde o cadastro (ex.: *Maquiagem* e *Penteado*) para exibição nas respectivas listagens por tipo de fornecedor.<br>• **Agenda de Próximos Noivos:** visualização cronológica dos próximos casamentos e eventos fechados ou em negociação (com data, nomes dos noivos, local, status e valores do contrato).<br>• **Autonomia Total de Cadastro:** mesmo que os noivos **não utilizem a plataforma**, o fornecedor pode cadastrar manualmente os dados do casal, data do casamento, cidade/local, valor fechado, valor pago e observações na sua agenda.<br>• **Portfólio Pago & Sync Instagram:** área dedicada para ativar o módulo pago de portfólio, gerenciar fotos dos trabalhos e conectar a conta do **Instagram** para sincronização automática do feed.<br>• **Vitrine & Destaques:** gestão do perfil público, contratação/ativação do **Destaque Regional** e submissão para uma das **5 vagas do Banner** do ciclo vigente (ex: 2 meses). |
+| **Fornecedor (Portal & Agenda)** | • **Áreas de Atuação no Cadastro:** seleção obrigatória de uma ou **múltiplas áreas de atuação** desde o cadastro (ex.: *Maquiagem* e *Penteado*) para exibição nas respectivas listagens por tipo de fornecedor.<br>• **Agenda de Próximos Noivos (Lista & Calendário):** visualização cronológica e em **calendário mensal** dos próximos casamentos e eventos fechados ou em negociação (com data, nomes dos noivos, local, status e valores do contrato), bloqueio de datas indisponíveis e alertas de conflito de data.<br>• **Autonomia Total de Cadastro:** mesmo que os noivos **não utilizem a plataforma**, o fornecedor pode cadastrar manualmente os dados do casal, data do casamento, cidade/local, valor fechado, valor pago e observações na sua agenda.<br>• **Portfólio Pago & Sync Instagram:** área dedicada para ativar o módulo pago de portfólio, gerenciar fotos dos trabalhos e conectar a conta do **Instagram** para sincronização automática do feed.<br>• **Vitrine & Destaques:** gestão do perfil público, contratação/ativação do **Destaque Regional** e submissão para uma das **5 vagas do Banner** do ciclo vigente (ex: 2 meses). |
 | **Admin / Plataforma** | • Painel de configuração de taxas (%), valores dos planos, duração do ciclo do banner, gestão das 5 vagas do banner e controle da **Feature Flag** de cobrança das inspirações. |
 
 ---
@@ -123,7 +123,10 @@ erDiagram
     WEDDINGS |o--o{ WEDDING_VENDORS : "contrata (opcional)"
     VENDOR_PROFILES |o--o{ WEDDING_VENDORS : "agenda/vincula (opcional)"
     VENDOR_PROFILES ||--o{ VENDOR_PORTFOLIO_ITEMS : "exibe (recurso pago)"
+    VENDOR_PROFILES ||--o{ VENDOR_BLOCKED_DATES : "bloqueia datas"
     WEDDINGS ||--o{ WEDDING_CHECKLIST_ITEMS : "organiza"
+    WEDDINGS ||--o{ WEDDING_EVENTS : "agenda compromissos"
+    WEDDING_VENDORS |o--o{ WEDDING_EVENTS : "vincula (opcional)"
     WEDDINGS ||--o{ PINTEREST_INSPIRATIONS : "salva"
     WEDDINGS ||--o{ GIFT_ITEMS : "oferece"
     WEDDINGS ||--o{ GIFT_PURCHASES : "recebe"
@@ -202,6 +205,15 @@ erDiagram
         timestamp published_at
     }
 
+    VENDOR_BLOCKED_DATES {
+        bigint id PK
+        bigint vendor_profile_id FK
+        date blocked_date
+        string block_type "indisponivel | evento_externo | pessoal"
+        string reason
+        text notes
+    }
+
     BANNER_CYCLES {
         bigint id PK
         string title
@@ -257,6 +269,22 @@ erDiagram
         string assigned_to "partner_1 | partner_2 | ambos | cerimonialista"
         date due_date
         text notes
+        timestamp completed_at
+    }
+
+    WEDDING_EVENTS {
+        bigint id PK
+        bigint wedding_id FK
+        bigint wedding_vendor_id FK "Opcional"
+        string title
+        string event_type "reuniao | degustacao | prova | pagamento | documento | outro"
+        date event_date
+        time start_time
+        time end_time
+        string location
+        string assigned_to "partner_1 | partner_2 | ambos | cerimonialista"
+        string status "agendado | concluido | cancelado"
+        string created_by_side "couple | cerimonialista"
         timestamp completed_at
     }
 
@@ -326,4 +354,5 @@ A documentação foi dividida em especificações incrementais dentro de `docs/s
 3. **[Spec 08 — Lista de Presentes, Taxas e Carteira Pix](specs/ativas/08-lista-de-presentes-taxas-e-carteira-pix.md):** página pública `/c/{slug}`, escolha de repasse/absorção de taxa e resgate via Chave Pix.
 4. **[Spec 09 — Noivos: Checklist e Lista do Grande Dia](specs/ativas/09-noivos-checklist-e-itens-do-grande-dia.md):** controle prático de itens e preparativos do casamento com marcação do que falta, do que está completando e do que os noivos já têm.
 5. **[Spec 10 — Inspirações Pinterest: Categoria Fotografia (Fotos)](specs/ativas/10-inspiracoes-pinterest-categoria-fotografia.md):** extensão do moodboard do Pinterest com inspirações de fotos para o **Fotógrafo** nos três canais de captura e paywall configurável.
+6. **[Spec 11 — Visualização com Calendário: Agenda do Fornecedor e Planejamento dos Noivos](specs/ativas/11-visualizacao-calendario-agenda-e-compromissos.md):** grade mensal mobile-first para fornecedores (com bloqueios de datas em `vendor_blocked_dates` e alertas de conflito) e calendário unificado de compromissos (`wedding_events`), Grande Dia e prazos do checklist para noivos e cerimonialista.
 

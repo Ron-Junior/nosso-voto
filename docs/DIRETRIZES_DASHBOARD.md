@@ -35,8 +35,8 @@ Este documento define os padrões obrigatórios de interface, arquitetura e qual
    - Valores financeiros (orçamento, contratos, pagamentos, presentes) devem usar `tabular-nums` para facilitar leitura comparativa.
    - Manter espaçamento inferior no conteúdo (`pb-24 lg:pb-10`) para que a barra de navegação móvel fixa nunca cubra ações da página.
 4. **Clareza Funcional por Perfil:**
-   - **Noivos / Casal:** foco direto em métricas financeiras (previsto vs. fechado vs. pago), fornecedores, checklist e progresso dos itens do grande dia, inspirações do Pinterest e lista de presentes/carteira Pix.
-   - **Fornecedor:** foco na agenda cronológica de próximos casamentos, vitrine regional e gestão do perfil/portfólio — exigindo no cadastro e no perfil a seleção de uma ou **múltiplas áreas de atuação** para exibição nas listagens filtradas por tipo de fornecedor.
+   - **Noivos / Casal:** foco direto em métricas financeiras (previsto vs. fechado vs. pago), fornecedores, checklist e progresso dos itens do grande dia, calendário de compromissos, inspirações do Pinterest e lista de presentes/carteira Pix.
+   - **Fornecedor:** foco na agenda em lista e calendário mensal (com bloqueio de datas indisponíveis) de próximos casamentos, vitrine regional e gestão do perfil/portfólio — exigindo no cadastro e no perfil a seleção de uma ou **múltiplas áreas de atuação** para exibição nas listagens filtradas por tipo de fornecedor.
    - **Admin:** foco operacional em feature flags, taxas globais e gestão de ciclos/vagas.
 5. **Privacidade e Segurança entre Perfis:**
    - Cerimonialistas e profissionais convidados via `invite_token` nunca acessam dados financeiros sensíveis da carteira de presentes Pix do casal.

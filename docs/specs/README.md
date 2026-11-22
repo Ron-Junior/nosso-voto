@@ -29,4 +29,5 @@ Esta pasta organiza todo o escopo do **Nosso Voto** em especificações técnica
 | `08` | [Lista de Presentes, Taxas e Carteira Pix](ativas/08-lista-de-presentes-taxas-e-carteira-pix.md) | `ativas` | `02` | `gift_items`, `gift_purchases`, `wallet_withdrawals`, repasse/absorção e saque Pix |
 | `09` | [Noivos: Checklist e Lista do Grande Dia](ativas/09-noivos-checklist-e-itens-do-grande-dia.md) | `ativas` | `02` | `wedding_checklist_items`, controle do que precisa, está completando e já tem |
 | `10` | [Inspirações Pinterest: Categoria Fotografia](ativas/10-inspiracoes-pinterest-categoria-fotografia.md) | `ativas` | `05` | Nova categoria `fotografia` (inspirações de fotos) para captura e moodboard do Fotógrafo |
+| `11` | [Calendário: Agenda do Fornecedor e Planejamento dos Noivos](ativas/11-visualizacao-calendario-agenda-e-compromissos.md) | `ativas` | `02`, `03`, `04` | Grade mensal mobile-first, `vendor_blocked_dates`, `wedding_events`, alertas de conflito e colaboração do Cerimonialista |
 
