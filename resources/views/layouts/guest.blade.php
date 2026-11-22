@@ -6,9 +6,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#C25E38">
     <title>{{ $pageTitle }}</title>
-    <link rel="manifest" href="/manifest.json">
+@include('partials.pwa-head')
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=lora:400,500,600,700|plus-jakarta-sans:400,500,600,700&display=swap" rel="stylesheet">
 
