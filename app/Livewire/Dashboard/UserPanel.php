@@ -2,16 +2,20 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\BannerCycle;
+use App\Models\BannerSubmission;
 use App\Models\PlatformSetting;
 use App\Models\User;
 use App\Models\VendorProfile;
 use App\Models\WeddingVendor;
+use App\Services\BannerCycleService;
 use App\Support\BrazilLocations;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -26,6 +30,11 @@ class UserPanel extends Component
     public string $business_name = '';
 
     public string $profile_category = 'fotografia';
+
+    /**
+     * @var list<string>
+     */
+    public array $profile_categories = ['fotografia'];
 
     public string $state = '';
 
@@ -74,6 +83,15 @@ class UserPanel extends Component
     public string $statusFilter = 'all';
 
     public string $search = '';
+
+    // Banner submission fields
+    public ?int $selected_banner_cycle_id = null;
+
+    public string $banner_headline = '';
+
+    public ?string $banner_image_url = null;
+
+    public ?string $banner_cta_link = null;
 
     private ?VendorProfile $cachedVendorProfile = null;
 
@@ -132,6 +150,35 @@ class UserPanel extends Component
         }
     }
 
+    public function updatedProfileCategory(string $value): void
+    {
+        if (! in_array($value, WeddingVendor::CATEGORIES, true)) {
+            return;
+        }
+
+        $sanitized = VendorProfile::sanitizeCategories($this->profile_categories);
+
+        if (count($sanitized) <= 1) {
+            $this->profile_categories = [$value];
+
+            return;
+        }
+
+        if (! in_array($value, $sanitized, true)) {
+            $this->profile_categories = [$value, ...$sanitized];
+        }
+    }
+
+    public function updatedProfileCategories(): void
+    {
+        $sanitized = VendorProfile::sanitizeCategories($this->profile_categories);
+        $this->profile_categories = $sanitized;
+
+        if ($sanitized !== [] && ! in_array($this->profile_category, $sanitized, true)) {
+            $this->profile_category = $sanitized[0];
+        }
+    }
+
     public function saveProfile(): void
     {
         $this->saveVendorProfile();
@@ -146,7 +193,9 @@ class UserPanel extends Component
 
         $validated = $this->validate([
             'business_name' => ['required', 'string', 'max:255'],
-            'profile_category' => ['required', Rule::in(WeddingVendor::CATEGORIES)],
+            'profile_category' => ['nullable', Rule::in(WeddingVendor::CATEGORIES)],
+            'profile_categories' => ['required', 'array', 'min:1'],
+            'profile_categories.*' => ['required', 'string', Rule::in(WeddingVendor::CATEGORIES)],
             'state' => ['required', 'string', Rule::in(BrazilLocations::stateCodes())],
             'city' => ['required', 'string', Rule::in(BrazilLocations::citiesForState($this->state))],
             'whatsapp' => ['required', 'string', 'max:50'],
@@ -157,6 +206,9 @@ class UserPanel extends Component
         ], [
             'business_name.required' => 'Informe o nome comercial ou fantasia do seu negócio.',
             'profile_category.in' => 'Selecione uma categoria válida.',
+            'profile_categories.required' => 'Selecione ao menos uma área de atuação.',
+            'profile_categories.min' => 'Selecione ao menos uma área de atuação.',
+            'profile_categories.*.in' => 'Selecione apenas áreas de atuação válidas.',
             'state.required' => 'Selecione o estado (UF) de atuação.',
             'state.in' => 'Selecione um estado (UF) válido.',
             'city.required' => 'Selecione a cidade de atuação.',
@@ -167,9 +219,15 @@ class UserPanel extends Component
             'price_from.min' => 'O valor inicial não pode ser negativo.',
         ]);
 
+        $categories = VendorProfile::sanitizeCategories($validated['profile_categories']);
+        $primaryCategory = filled($validated['profile_category'] ?? null) && in_array($validated['profile_category'], $categories, true)
+            ? $validated['profile_category']
+            : $categories[0];
+
         $payload = [
             'business_name' => trim($validated['business_name']),
-            'category' => $validated['profile_category'],
+            'category' => $primaryCategory,
+            'categories' => $categories,
             'state' => Str::upper(trim($validated['state'])),
             'city' => trim($validated['city']),
             'whatsapp' => trim($validated['whatsapp']),
@@ -400,6 +458,109 @@ class UserPanel extends Component
         $this->notify("Casamento de {$coupleTitle} adicionado à sua agenda.");
     }
 
+    public function activateRegionalHighlight(): void
+    {
+        $user = $this->authorizeVendorAccess();
+        $profile = $this->resolveVendorProfile($user);
+
+        if ($profile === null) {
+            $this->addError('highlight', 'Configure seu perfil profissional com cidade e estado antes de ativar o Destaque Regional.');
+
+            return;
+        }
+
+        $baseDate = $profile->hasActiveRegionalHighlight() && $profile->highlight_expires_at !== null
+            ? $profile->highlight_expires_at->copy()
+            : now();
+
+        $profile->update([
+            'is_regional_highlight' => true,
+            'highlight_expires_at' => $baseDate->addMonth(),
+        ]);
+
+        $freshProfile = $profile->fresh();
+        $user->setRelation('vendorProfile', $freshProfile);
+        $this->cachedVendorProfile = $freshProfile;
+        $this->vendorProfileLoaded = true;
+
+        $this->notify('Destaque Regional ativado por 30 dias! Seu perfil entra na rotação randômica no topo da Vitrine.');
+    }
+
+    public function updatedSelectedBannerCycleId(): void
+    {
+        $this->statusMessage = '';
+        $user = Auth::user();
+
+        if ($user === null || $this->selected_banner_cycle_id === null) {
+            return;
+        }
+
+        $profile = $this->resolveVendorProfile($user);
+
+        if ($profile === null) {
+            return;
+        }
+
+        $existing = BannerSubmission::query()
+            ->where('banner_cycle_id', $this->selected_banner_cycle_id)
+            ->where('vendor_profile_id', $profile->id)
+            ->first();
+
+        if ($existing !== null) {
+            $this->banner_headline = $existing->headline;
+            $this->banner_image_url = $existing->banner_image_url;
+            $this->banner_cta_link = $existing->cta_link;
+        }
+    }
+
+    public function submitToBannerCycle(BannerCycleService $bannerCycleService): void
+    {
+        $user = $this->authorizeVendorAccess();
+        $profile = $this->resolveVendorProfile($user);
+
+        if ($profile === null) {
+            $this->addError('banner_submission', 'Configure seu perfil profissional antes de enviar candidatura ao Banner Principal.');
+
+            return;
+        }
+
+        $validated = $this->validate([
+            'selected_banner_cycle_id' => ['required', 'integer', 'exists:banner_cycles,id'],
+            'banner_headline' => ['required', 'string', 'max:160'],
+            'banner_image_url' => ['nullable', 'url', 'max:2048'],
+            'banner_cta_link' => ['nullable', 'url', 'max:2048'],
+        ], [
+            'selected_banner_cycle_id.required' => 'Selecione um ciclo ativo para enviar sua candidatura.',
+            'selected_banner_cycle_id.exists' => 'O ciclo de banner selecionado não foi encontrado.',
+            'banner_headline.required' => 'Informe um título ou chamada de destaque para o banner.',
+            'banner_headline.max' => 'A chamada do banner deve ter no máximo 160 caracteres.',
+            'banner_image_url.url' => 'Informe uma URL válida para a imagem do banner.',
+            'banner_cta_link.url' => 'Informe uma URL válida para o link de destino.',
+        ]);
+
+        $cycle = BannerCycle::query()->findOrFail($validated['selected_banner_cycle_id']);
+
+        try {
+            $submission = $bannerCycleService->submitVendor($cycle, $profile, [
+                'headline' => $validated['banner_headline'],
+                'banner_image_url' => $validated['banner_image_url'],
+                'cta_link' => $validated['banner_cta_link'],
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            $this->addError('banner_submission', $exception->getMessage());
+
+            return;
+        }
+
+        $message = match ($submission->status) {
+            BannerSubmission::STATUS_WAITLIST => 'Candidatura registrada na Lista de Espera deste ciclo (as 5 vagas já estão preenchidas).',
+            BannerSubmission::STATUS_ACTIVE => 'Dados do seu banner ativo atualizados com sucesso.',
+            default => 'Candidatura ao Banner Principal enviada com sucesso! Aguarde a aprovação.',
+        };
+
+        $this->notify($message);
+    }
+
     public function regenerateToken(): void
     {
         $user = Auth::user();
@@ -437,11 +598,45 @@ class UserPanel extends Component
             'remainingToReceive' => 0.0,
         ];
 
+        $activeBannerCycles = collect();
+        $vendorBannerSubmissions = collect();
+
         if ($vendorProfile !== null) {
             $scheduleSummary = $this->buildScheduleSummary($vendorProfile);
 
             if ($includeScheduleEntries) {
                 $scheduleEntries = $this->resolveScheduleEntries($vendorProfile);
+            } else {
+                $activeBannerCycles = BannerCycle::query()
+                    ->openForSubmissions()
+                    ->forRegion($vendorProfile->state, $vendorProfile->city)
+                    ->withCount([
+                        'submissions as active_slots_count' => fn ($query) => $query->where('status', BannerSubmission::STATUS_ACTIVE),
+                    ])
+                    ->orderBy('starts_at')
+                    ->get();
+
+                if ($activeBannerCycles->isNotEmpty()) {
+                    $vendorBannerSubmissions = BannerSubmission::query()
+                        ->where('vendor_profile_id', $vendorProfile->id)
+                        ->whereIn('banner_cycle_id', $activeBannerCycles->pluck('id'))
+                        ->get()
+                        ->keyBy('banner_cycle_id');
+
+                    if (
+                        $this->selected_banner_cycle_id === null
+                        || ! $activeBannerCycles->contains('id', $this->selected_banner_cycle_id)
+                    ) {
+                        $firstCycle = $activeBannerCycles->first();
+                        $this->selected_banner_cycle_id = $firstCycle->id;
+
+                        if (blank($this->banner_headline) && ($existingSubmission = $vendorBannerSubmissions->get($firstCycle->id)) !== null) {
+                            $this->banner_headline = $existingSubmission->headline;
+                            $this->banner_image_url = $existingSubmission->banner_image_url;
+                            $this->banner_cta_link = $existingSubmission->cta_link;
+                        }
+                    }
+                }
             }
         }
 
@@ -453,6 +648,9 @@ class UserPanel extends Component
             'scheduleEntries' => $scheduleEntries,
             'scheduleSummary' => $scheduleSummary,
             'linkedWeddingVendors' => $includeScheduleEntries ? collect() : $this->resolveLinkedWeddingVendors($user),
+            'activeBannerCycles' => $activeBannerCycles,
+            'vendorBannerSubmissions' => $vendorBannerSubmissions,
+            'submissionStatusLabels' => BannerSubmission::statusLabels(),
             'categoryLabels' => WeddingVendor::categoryLabels(),
             'statusLabels' => WeddingVendor::statusLabels(),
             'states' => $includeScheduleEntries ? [] : BrazilLocations::states(),
@@ -511,12 +709,19 @@ class UserPanel extends Component
             ? trim($this->city)
             : ($cities[0] ?? 'São Paulo');
 
+        $sanitizedCategories = VendorProfile::sanitizeCategories($this->profile_categories);
+        $primaryCategory = in_array($this->profile_category, WeddingVendor::CATEGORIES, true)
+            ? $this->profile_category
+            : ($sanitizedCategories[0] ?? 'outros');
+        $resolvedCategories = $sanitizedCategories !== []
+            ? array_values(array_unique([$primaryCategory, ...$sanitizedCategories]))
+            : [$primaryCategory];
+
         $profile = VendorProfile::query()->create([
             'user_id' => $user->id,
             'business_name' => filled($this->business_name) ? trim($this->business_name) : $user->name,
-            'category' => in_array($this->profile_category, WeddingVendor::CATEGORIES, true)
-                ? $this->profile_category
-                : 'outros',
+            'category' => $primaryCategory,
+            'categories' => $resolvedCategories,
             'state' => $defaultState,
             'city' => $defaultCity,
             'whatsapp' => filled($this->whatsapp)
@@ -659,6 +864,7 @@ class UserPanel extends Component
     {
         $this->business_name = $profile->business_name;
         $this->profile_category = $profile->category;
+        $this->profile_categories = $profile->allCategories();
         $this->state = $profile->state;
         $this->city = $profile->city;
         $this->whatsapp = $profile->whatsapp;
@@ -672,10 +878,16 @@ class UserPanel extends Component
 
     private function prefillProfileFormFromUser(User $user): void
     {
+        $userState = filled($user->state) ? Str::upper(trim((string) $user->state)) : '';
+        $hasValidState = in_array($userState, BrazilLocations::stateCodes(), true);
+
         $this->business_name = $user->name;
         $this->profile_category = 'fotografia';
-        $this->state = 'SP';
-        $this->city = '';
+        $this->profile_categories = ['fotografia'];
+        $this->state = $hasValidState ? $userState : 'SP';
+        $this->city = $hasValidState && BrazilLocations::isValidCityForState($this->state, $user->city)
+            ? trim((string) $user->city)
+            : '';
         $this->whatsapp = '';
         $this->instagram = null;
         $this->description = null;

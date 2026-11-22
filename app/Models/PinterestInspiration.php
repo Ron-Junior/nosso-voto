@@ -132,6 +132,43 @@ class PinterestInspiration extends Model
     }
 
     /**
+     * Extract the first direct image URL (such as i.pinimg.com or image file URLs) from inputs.
+     */
+    public static function extractImageUrl(?string ...$inputs): ?string
+    {
+        foreach ($inputs as $input) {
+            if (blank($input)) {
+                continue;
+            }
+
+            if (preg_match_all('/https?:\/\/[^\s<>"\'\]]+/i', (string) $input, $matches) < 1) {
+                continue;
+            }
+
+            foreach ($matches[0] as $rawMatch) {
+                $url = rtrim($rawMatch, ".,;:!?)]}'\"");
+
+                if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+                    continue;
+                }
+
+                $host = Str::lower((string) parse_url($url, PHP_URL_HOST));
+                $path = Str::lower((string) parse_url($url, PHP_URL_PATH));
+
+                if ($host === 'i.pinimg.com') {
+                    return $url;
+                }
+
+                if ($host !== 's.pinimg.com' && preg_match('/\.(?:jpe?g|png|webp|gif)$/i', $path) === 1) {
+                    return $url;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Infer whether a Pinterest URL points to a board (pasta) or a single pin.
      */
     public static function inferTypeFromUrl(?string $url): string
@@ -202,4 +239,3 @@ class PinterestInspiration extends Model
         return $this->type === self::TYPE_PIN;
     }
 }
-

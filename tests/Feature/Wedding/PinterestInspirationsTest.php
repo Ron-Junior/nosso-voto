@@ -11,8 +11,10 @@ use App\Models\PlatformSetting;
 use App\Models\User;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
+use App\Services\PinterestMetadataResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -554,5 +556,158 @@ class PinterestInspirationsTest extends TestCase
         DB::disableQueryLog();
 
         $this->assertLessThanOrEqual(3, count($queries));
+    }
+
+    public function test_pwa_share_target_automatically_resolves_and_saves_image_url_from_pin_it_redirect_and_opengraph(): void
+    {
+        config()->set('services.pinterest.fetch_metadata', true);
+
+        Http::fake([
+            'https://pin.it/terracota42' => Http::response('', 302, [
+                'Location' => 'https://br.pinterest.com/pin/999111222/sent/?invite_code=xyz',
+            ]),
+            'https://br.pinterest.com/pin/999111222/sent*' => Http::response(
+                '<!doctype html><html><head>'
+                .'<meta property="og:title" content="Arco Floral Terracota | Pinterest">'
+                .'<meta content="https://i.pinimg.com/736x/ab/cd/ef/decor-terracota.jpg" property="og:image">'
+                .'</head><body></body></html>',
+                200,
+            ),
+        ]);
+
+        $couple = User::factory()->couple()->create();
+        $wedding = Wedding::factory()->create(['user_id' => $couple->id]);
+        $this->actingAs($couple);
+
+        Livewire::withQueryParams([
+            'text' => 'Olha esse pin https://pin.it/terracota42',
+        ])->test(PwaShareTarget::class)
+            ->assertSet('pinterest_url', 'https://pin.it/terracota42')
+            ->assertSet('image_url', 'https://i.pinimg.com/736x/ab/cd/ef/decor-terracota.jpg')
+            ->assertSet('title', 'Arco Floral Terracota')
+            ->assertSeeHtml('src="https://i.pinimg.com/736x/ab/cd/ef/decor-terracota.jpg"')
+            ->call('quickSave', PinterestInspiration::CATEGORY_DECORACAO)
+            ->assertHasNoErrors()
+            ->assertDispatched('toast', message: 'Inspiração salva em Decoração com sucesso!');
+
+        $this->assertDatabaseHas('pinterest_inspirations', [
+            'wedding_id' => $wedding->id,
+            'category' => PinterestInspiration::CATEGORY_DECORACAO,
+            'title' => 'Arco Floral Terracota',
+            'pinterest_url' => 'https://pin.it/terracota42',
+            'image_url' => 'https://i.pinimg.com/736x/ab/cd/ef/decor-terracota.jpg',
+            'source' => PinterestInspiration::SOURCE_PWA_SHARE,
+        ]);
+    }
+
+    public function test_pinterest_metadata_resolver_falls_back_to_oembed_and_handles_failures(): void
+    {
+        config()->set('services.pinterest.fetch_metadata', true);
+
+        $couple = User::factory()->couple()->create();
+        $wedding = Wedding::factory()->create(['user_id' => $couple->id]);
+        $this->actingAs($couple);
+
+        Http::fake([
+            'https://br.pinterest.com/pin/555444333/' => Http::response(
+                '<html><head><meta property="og:image" content="https://s.pinimg.com/webapp/pinterest_logo.png"></head></html>',
+                200,
+            ),
+            'https://www.pinterest.com/oembed.json?url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F555444333%2F' => Http::response([
+                'thumbnail_url' => 'https://i.pinimg.com/236x/11/22/33/oembed-make.jpg',
+                'title' => 'Make Noiva Clássica',
+            ], 200),
+            'https://br.pinterest.com/pin/666777888/' => Http::response('Error', 500),
+            'https://www.pinterest.com/oembed.json?url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F666777888%2F' => Http::response('Error', 500),
+            'https://br.pinterest.com/pin/888111222/' => Http::response(
+                '<html><head><meta name="twitter:image" content="https://i.pinimg.com/736x/99/88/77/board-auto.jpg"></head></html>',
+                200,
+            ),
+        ]);
+
+        // 1. Generic s.pinimg.com logo is rejected and triggers oEmbed fallback
+        Livewire::withQueryParams([
+            'url' => 'https://br.pinterest.com/pin/555444333/',
+        ])->test(PwaShareTarget::class)
+            ->assertSet('image_url', 'https://i.pinimg.com/236x/11/22/33/oembed-make.jpg')
+            ->assertSet('title', 'Make Noiva Clássica')
+            ->call('quickSave', PinterestInspiration::CATEGORY_MAQUIAGEM)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('pinterest_inspirations', [
+            'wedding_id' => $wedding->id,
+            'pinterest_url' => 'https://br.pinterest.com/pin/555444333/',
+            'image_url' => 'https://i.pinimg.com/236x/11/22/33/oembed-make.jpg',
+        ]);
+
+        // 2. Pinterest 500 error never blocks saving the pin
+        Livewire::withQueryParams([
+            'title' => 'Penteado Resiliente',
+            'url' => 'https://br.pinterest.com/pin/666777888/',
+        ])->test(PwaShareTarget::class)
+            ->assertSet('image_url', null)
+            ->call('quickSave', PinterestInspiration::CATEGORY_PENTEADO)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('pinterest_inspirations', [
+            'wedding_id' => $wedding->id,
+            'pinterest_url' => 'https://br.pinterest.com/pin/666777888/',
+            'image_url' => null,
+        ]);
+
+        // 3. Direct image_url query param is preserved without hitting HTTP
+        Livewire::withQueryParams([
+            'url' => 'https://br.pinterest.com/pin/777111222/',
+            'image_url' => 'https://i.pinimg.com/564x/aa/bb/cc/direct-query.jpg',
+        ])->test(PwaShareTarget::class)
+            ->assertSet('image_url', 'https://i.pinimg.com/564x/aa/bb/cc/direct-query.jpg')
+            ->call('quickSave', PinterestInspiration::CATEGORY_DECORACAO)
+            ->assertHasNoErrors();
+
+        // 4. PinterestBoard also resolves image_url automatically when omitted
+        Livewire::test(PinterestBoard::class)
+            ->set('category', PinterestInspiration::CATEGORY_DECORACAO)
+            ->set('type', PinterestInspiration::TYPE_PIN)
+            ->set('pinterest_url', 'https://br.pinterest.com/pin/888111222/')
+            ->call('saveInspiration')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('pinterest_inspirations', [
+            'wedding_id' => $wedding->id,
+            'pinterest_url' => 'https://br.pinterest.com/pin/888111222/',
+            'image_url' => 'https://i.pinimg.com/736x/99/88/77/board-auto.jpg',
+        ]);
+    }
+
+    public function test_pinterest_metadata_resolver_blocks_non_pinterest_hosts_and_unsafe_redirects(): void
+    {
+        config()->set('services.pinterest.fetch_metadata', true);
+
+        Http::fake([
+            'https://pin.it/evil-redirect' => Http::response('', 302, [
+                'Location' => 'http://127.0.0.1/internal-secret',
+            ]),
+        ]);
+
+        $resolver = app(PinterestMetadataResolver::class);
+
+        $this->assertSame(
+            ['image_url' => null, 'title' => null, 'canonical_url' => null],
+            $resolver->resolve('http://127.0.0.1/admin'),
+        );
+        $this->assertSame(
+            ['image_url' => null, 'title' => null, 'canonical_url' => null],
+            $resolver->resolve('https://evil.example/pin/1'),
+        );
+        $this->assertSame(
+            ['image_url' => null, 'title' => null, 'canonical_url' => null],
+            $resolver->resolve('https://pin.it/evil-redirect'),
+        );
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => $request->url() === 'https://pin.it/evil-redirect');
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), '127.0.0.1'));
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'evil.example'));
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'oembed.json'));
     }
 }

@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'pinterest' => [
+        'fetch_metadata' => env('PINTEREST_FETCH_METADATA', true),
+        'timeout' => (int) env('PINTEREST_METADATA_TIMEOUT', 4),
+    ],
+
 ];

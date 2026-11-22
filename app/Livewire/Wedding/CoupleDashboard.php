@@ -490,6 +490,13 @@ class CoupleDashboard extends Component
 
     private function prefillCoupleNamesFromUser(User $user): void
     {
+        if (filled($user->state) && in_array(Str::upper(trim($user->state)), BrazilLocations::stateCodes(), true)) {
+            $this->state = Str::upper(trim($user->state));
+            $this->city = BrazilLocations::isValidCityForState($this->state, $user->city)
+                ? trim((string) $user->city)
+                : '';
+        }
+
         if (str_contains($user->name, '&')) {
             [$first, $second] = array_map('trim', explode('&', $user->name, 2));
             $this->partner_1_name = $first;

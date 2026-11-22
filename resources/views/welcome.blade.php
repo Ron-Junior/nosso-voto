@@ -34,6 +34,7 @@
                 <a href="#como-funciona" class="hover:text-[#C25E38] transition-colors">Como Funciona</a>
                 <a href="#noivos" class="hover:text-[#C25E38] transition-colors">Para Noivos</a>
                 <a href="#fornecedores" class="hover:text-[#C25E38] transition-colors">Para Fornecedores</a>
+                <a href="{{ route('showcase.index') }}" class="hover:text-[#C25E38] transition-colors">Vitrine</a>
             </nav>
 
             <div class="flex items-center gap-2.5 shrink-0">
@@ -62,6 +63,7 @@
                 <a href="#como-funciona" class="whitespace-nowrap rounded-lg px-2.5 py-2 min-h-[38px] inline-flex items-center hover:text-[#C25E38]">Como Funciona</a>
                 <a href="#noivos" class="whitespace-nowrap rounded-lg px-2.5 py-2 min-h-[38px] inline-flex items-center hover:text-[#C25E38]">Para Noivos</a>
                 <a href="#fornecedores" class="whitespace-nowrap rounded-lg px-2.5 py-2 min-h-[38px] inline-flex items-center hover:text-[#C25E38]">Fornecedores</a>
+                <a href="{{ route('showcase.index') }}" class="whitespace-nowrap rounded-lg px-2.5 py-2 min-h-[38px] inline-flex items-center hover:text-[#C25E38]">Vitrine</a>
             </nav>
         </div>
     </header>
@@ -416,6 +418,7 @@
             <div class="flex flex-wrap items-center justify-center gap-5">
                 <a href="#funcionalidades" class="hover:text-[#C25E38] transition-colors">Funcionalidades</a>
                 <a href="#como-funciona" class="hover:text-[#C25E38] transition-colors">Como Funciona</a>
+                <a href="{{ route('showcase.index') }}" class="hover:text-[#C25E38] transition-colors">Vitrine</a>
                 <a href="{{ route('login') }}" class="hover:text-[#C25E38] transition-colors">Entrar</a>
                 <a href="{{ route('register') }}" class="hover:text-[#C25E38] transition-colors">Criar Conta</a>
             </div>

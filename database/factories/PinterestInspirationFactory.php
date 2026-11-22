@@ -73,4 +73,3 @@ class PinterestInspirationFactory extends Factory
         ]);
     }
 }
-

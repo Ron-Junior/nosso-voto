@@ -6,6 +6,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Dashboard\UserPanel;
 use App\Livewire\Vendor\VendorSchedule;
+use App\Livewire\Vendor\VendorShowcase;
 use App\Livewire\Wedding\CoupleDashboard;
 use App\Livewire\Wedding\PinterestBoard;
 use App\Livewire\Wedding\PwaShareTarget;
@@ -17,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+Route::get('/vitrine', VendorShowcase::class)->name('showcase.index');
+Route::get('/vitrine/{slug}', VendorShowcase::class)->name('showcase.show');
 
 Route::get('/acesso/profissional/{token}', VendorWeddingAccess::class)
     ->name('vendor.wedding.access');

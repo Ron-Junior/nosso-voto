@@ -146,4 +146,3 @@ class PwaManifestAndAssetsTest extends TestCase
         }
     }
 }
-

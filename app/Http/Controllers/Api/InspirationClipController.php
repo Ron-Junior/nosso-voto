@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\PinterestInspiration;
 use App\Models\User;
+use App\Services\PinterestMetadataResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class InspirationClipController extends Controller
@@ -83,17 +85,29 @@ class InspirationClipController extends Controller
 
         $validated = $validator->validated();
         $wedding = $user->resolveOrCreateWedding();
+        $pinterestUrl = trim($validated['pinterest_url']);
+        $imageUrl = filled($validated['image_url'] ?? null) ? trim((string) $validated['image_url']) : null;
+        $rawTitle = $validated['title'] ?? null;
+
+        if ($imageUrl === null) {
+            $resolvedMeta = app(PinterestMetadataResolver::class)->resolve($pinterestUrl);
+            $imageUrl = $resolvedMeta['image_url'];
+
+            if (blank($rawTitle) && filled($resolvedMeta['title'])) {
+                $rawTitle = Str::limit($resolvedMeta['title'], 255, '');
+            }
+        }
 
         $inspiration = $wedding->pinterestInspirations()->create([
             'category' => $validated['category'],
             'type' => $validated['type'],
             'title' => PinterestInspiration::fallbackTitle(
-                $validated['title'] ?? null,
+                $rawTitle,
                 $validated['category'],
                 $validated['type'],
             ),
-            'pinterest_url' => trim($validated['pinterest_url']),
-            'image_url' => filled($validated['image_url'] ?? null) ? trim((string) $validated['image_url']) : null,
+            'pinterest_url' => $pinterestUrl,
+            'image_url' => $imageUrl,
             'bride_notes' => filled($validated['bride_notes'] ?? null) ? trim((string) $validated['bride_notes']) : null,
             'source' => PinterestInspiration::SOURCE_CHROME_EXTENSION,
         ]);
@@ -160,4 +174,3 @@ class InspirationClipController extends Controller
         ];
     }
 }
-

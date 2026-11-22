@@ -1,6 +1,6 @@
 # Spec 06 — Vitrine Regional, Destaque Randômico e Banner de Ciclos (Máx. 5 Vagas)
 
-- **Status:** Ativa
+- **Status:** Concluída (`arquivadas`)
 - **Dependências:** [04-fornecedor-agenda-e-noivos-autonomos](../arquivadas/04-fornecedor-agenda-e-noivos-autonomos.md)
 
 ## 1. Objetivo
@@ -49,10 +49,10 @@ Construir a Vitrine Regional de Fornecedores com foco na **monetização B2B jus
 - `/admin/configuracoes`: gestão dos ciclos de banner, aprovação das submissões respeitando o limite de 5 slots e configuração da duração do ciclo (`banner_cycle_months`).
 
 ## 5. Critérios de Aceite
-- [ ] Fornecedor ao se cadastrar escolhe obrigatoriamente ao menos uma área de atuação, podendo selecionar várias áreas.
-- [ ] Fornecedor cadastrado em múltiplas áreas aparece na listagem de fornecedores de cada tipo correspondente na Vitrine (`/vitrine`).
-- [ ] Fornecedores com Destaque Regional aparecem acima dos gratuitos e mudam de ordem aleatoriamente entre requisições.
-- [ ] Tentativa de ativar um 6º fornecedor no mesmo `BannerCycle` (com `max_slots = 5`) é bloqueada pela regra de negócio e testes automatizados.
-- [ ] Todos os fornecedores da região conseguem submeter candidatura para o ciclo do banner.
-- [ ] Noivos conseguem vincular um fornecedor da vitrine diretamente ao orçamento do seu casamento.
+- [x] Fornecedor ao se cadastrar escolhe obrigatoriamente ao menos uma área de atuação, podendo selecionar várias áreas.
+- [x] Fornecedor cadastrado em múltiplas áreas aparece na listagem de fornecedores de cada tipo correspondente na Vitrine (`/vitrine`).
+- [x] Fornecedores com Destaque Regional aparecem acima dos gratuitos e mudam de ordem aleatoriamente entre requisições.
+- [x] Tentativa de ativar um 6º fornecedor no mesmo `BannerCycle` (com `max_slots = 5`) é bloqueada pela regra de negócio e testes automatizados.
+- [x] Todos os fornecedores da região conseguem submeter candidatura para o ciclo do banner.
+- [x] Noivos conseguem vincular um fornecedor da vitrine diretamente ao orçamento do seu casamento.
 

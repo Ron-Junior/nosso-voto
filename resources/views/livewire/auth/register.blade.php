@@ -1,4 +1,33 @@
-<div class="max-w-lg mx-auto" x-data="{ role: $wire.entangle('role') }">
+<div class="max-w-lg mx-auto"
+     x-data="{
+         role: $wire.entangle('role'),
+         citiesMap: @js($citiesByState),
+         syncCityOptions(selectEl, uf, preferredCity = '') {
+             if (!selectEl) return;
+             const normalizedUf = String(uf || '').trim().toUpperCase();
+             const cities = this.citiesMap[normalizedUf] || [];
+             const currentCity = preferredCity !== '' ? preferredCity : ($wire.city || '');
+             selectEl.innerHTML = '';
+             const placeholder = document.createElement('option');
+             placeholder.value = '';
+             placeholder.textContent = cities.length === 0 ? 'Selecione o estado primeiro' : 'Selecione a cidade';
+             selectEl.appendChild(placeholder);
+             for (const cityName of cities) {
+                 const opt = document.createElement('option');
+                 opt.value = cityName;
+                 opt.textContent = cityName;
+                 selectEl.appendChild(opt);
+             }
+             selectEl.disabled = cities.length === 0;
+             if (cities.includes(currentCity)) {
+                 selectEl.value = currentCity;
+                 $wire.city = currentCity;
+             } else {
+                 selectEl.value = '';
+                 $wire.city = '';
+             }
+         }
+     }">
     <div class="rounded-2xl border border-[#EAE0DA] bg-[#FFFFFF] p-6 sm:p-8 shadow-sm space-y-6">
         <div class="space-y-2 text-center">
             <span class="inline-flex items-center rounded-full bg-[#F9EBE6] px-3 py-1 text-xs font-semibold text-[#C25E38]">
@@ -71,6 +100,99 @@
                 @enderror
             </div>
 
+            {{-- Region Selector (State + City) --}}
+            <div class="rounded-2xl border border-[#EAE0DA] bg-[#FBF9F7] p-4 space-y-3">
+                <div class="space-y-0.5">
+                    <span class="block text-sm font-medium text-[#2C2523]"
+                          x-text="role === 'vendor' ? 'Região de atuação na Vitrine Regional' : 'Região do casamento'">
+                        {{ $role === 'vendor' ? 'Região de atuação na Vitrine Regional' : 'Região do casamento' }}
+                    </span>
+                    <p class="text-xs text-[#6E625F]"
+                       x-text="role === 'vendor' ? 'Selecione o estado e a cidade onde seu serviço será exibido.' : 'Selecione o estado e a cidade para encontrar fornecedores próximos.'">
+                        {{ $role === 'vendor' ? 'Selecione o estado e a cidade onde seu serviço será exibido.' : 'Selecione o estado e a cidade para encontrar fornecedores próximos.' }}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="register-state" class="block text-xs font-semibold uppercase tracking-wider text-[#6E625F] mb-1.5">
+                            Estado (UF) <span class="text-[#C25E38]">*</span>
+                        </label>
+                        <select id="register-state"
+                                wire:model="state"
+                                required
+                                @change="syncCityOptions($refs.registerCitySelect, $el.value)"
+                                class="w-full rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2.5 min-h-[48px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:outline-none">
+                            <option value="">Selecione o estado</option>
+                            @foreach ($states as $uf => $stateName)
+                                <option value="{{ $uf }}">{{ $uf }} — {{ $stateName }}</option>
+                            @endforeach
+                        </select>
+                        @error('state')
+                            <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="register-city" class="block text-xs font-semibold uppercase tracking-wider text-[#6E625F] mb-1.5">
+                            Cidade <span class="text-[#C25E38]">*</span>
+                        </label>
+                        <select id="register-city"
+                                x-ref="registerCitySelect"
+                                wire:model="city"
+                                required
+                                @disabled(empty($citiesForSelectedState))
+                                class="w-full rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3.5 py-2.5 min-h-[48px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed">
+                            <option value="">
+                                {{ empty($citiesForSelectedState) ? 'Selecione o estado primeiro' : 'Selecione a cidade' }}
+                            </option>
+                            @foreach ($citiesForSelectedState as $cityOption)
+                                <option value="{{ $cityOption }}">{{ $cityOption }}</option>
+                            @endforeach
+                        </select>
+                        @error('city')
+                            <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- Multiple Vendor Categories --}}
+            <div x-show="role === 'vendor'"
+                 @if ($role !== 'vendor') x-cloak @endif
+                 class="rounded-2xl border border-[#EAE0DA] bg-[#FBF9F7] p-4 space-y-3">
+                <div class="space-y-1">
+                    <span class="block text-sm font-medium text-[#2C2523]">
+                        Áreas de Atuação <span class="text-[#C25E38]">*</span>
+                    </span>
+                    <p class="text-xs text-[#6E625F]">
+                        Escolha uma ou mais áreas em que você atende. Seu perfil será exibido em todas elas na Vitrine.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2" role="group" aria-label="Áreas de atuação do fornecedor">
+                    @foreach ($categoryLabels as $key => $label)
+                        <label class="relative flex items-center cursor-pointer">
+                            <input type="checkbox"
+                                   wire:model="vendor_categories"
+                                   value="{{ $key }}"
+                                   class="peer sr-only">
+                            <span class="w-full inline-flex items-center gap-2 rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-3 py-2.5 min-h-[44px] text-xs sm:text-sm font-medium text-[#2C2523] transition-colors peer-checked:border-[#C25E38] peer-checked:bg-[#F9EBE6] peer-checked:text-[#C25E38] peer-checked:font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-[#C25E38]">
+                                <span class="h-2 w-2 rounded-full bg-[#EAE0DA] peer-checked:bg-[#C25E38] shrink-0"></span>
+                                <span class="truncate">{{ $label }}</span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+
+                @error('vendor_categories')
+                    <p class="text-xs font-medium text-red-600">{{ $message }}</p>
+                @enderror
+                @error('vendor_categories.*')
+                    <p class="text-xs font-medium text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div>
                 <label for="register-email" class="block text-sm font-medium text-[#2C2523] mb-1.5">
                     E-mail
@@ -138,4 +260,3 @@
         </p>
     </div>
 </div>
-

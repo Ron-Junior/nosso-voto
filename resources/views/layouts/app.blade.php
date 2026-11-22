@@ -51,6 +51,15 @@
                             <span>Início</span>
                         </a>
 
+                        <a href="{{ route('showcase.index') }}"
+                           wire:navigate
+                           class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 min-h-[44px] text-sm font-medium transition-colors {{ request()->routeIs('showcase.*') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F] hover:bg-[#FBF9F7] hover:text-[#2C2523]' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                            </svg>
+                            <span>Vitrine Regional</span>
+                        </a>
+
                         @if ($user->isCouple() || $user->isAdmin())
                             <a href="{{ route('dashboard') }}"
                                wire:navigate
@@ -210,15 +219,26 @@
                         <span>Painel Noivos</span>
                     </a>
 
-                    <a href="{{ route('inspirations.index') }}"
-                       wire:navigate
-                       class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('inspirations.*') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-                        </svg>
-                        <span>Inspirações</span>
-                    </a>
+                    @if ($user->isCouple())
+                        <a href="{{ route('inspirations.index') }}"
+                           wire:navigate
+                           class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('inspirations.*') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                            </svg>
+                            <span>Inspirações</span>
+                        </a>
+                    @endif
                 @endif
+
+                <a href="{{ route('showcase.index') }}"
+                   wire:navigate
+                   class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium {{ request()->routeIs('showcase.*') ? 'bg-[#F9EBE6] text-[#C25E38] font-semibold' : 'text-[#6E625F]' }}">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614" />
+                    </svg>
+                    <span>Vitrine</span>
+                </a>
 
                 @if ($user->isVendor() || $user->isAdmin())
                     <a href="{{ route('vendor.dashboard') }}"
@@ -250,22 +270,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                         </svg>
                         <span>Admin</span>
-                    </a>
-                @elseif ($user->isCouple())
-                    <a href="{{ route('dashboard') }}#api-token"
-                       class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium text-[#6E625F]">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-                        </svg>
-                        <span>Token API</span>
-                    </a>
-                @else
-                    <a href="{{ route('vendor.dashboard') }}#api-token"
-                       class="flex flex-col items-center justify-center gap-0.5 rounded-xl min-h-[48px] px-2 py-1 text-[11px] font-medium text-[#6E625F]">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-                        </svg>
-                        <span>Token API</span>
                     </a>
                 @endif
             </div>

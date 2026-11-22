@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\BannerCycle;
 use App\Models\PinterestInspiration;
 use App\Models\PlatformSetting;
 use App\Models\User;
+use App\Models\VendorProfile;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -162,5 +164,45 @@ class DatabaseSeeder extends Seeder
                 );
             }
         }
+
+        $vendorUser = User::query()->where('email', 'fornecedor@nossovoto.com.br')->first();
+
+        if ($vendorUser !== null) {
+            VendorProfile::query()->firstOrCreate(
+                ['user_id' => $vendorUser->id],
+                [
+                    'business_name' => 'Ateliê Terracota Eventos',
+                    'slug' => 'atelie-terracota-eventos',
+                    'category' => 'decoracao',
+                    'categories' => ['decoracao', 'espaco'],
+                    'city' => 'São Paulo',
+                    'state' => 'SP',
+                    'whatsapp' => '(11) 98888-7777',
+                    'instagram' => '@atelieterra',
+                    'description' => 'Decoração autoral e espaço integrado em tons terracota e areia para cerimônias memoráveis.',
+                    'price_from' => 9500.00,
+                    'is_regional_highlight' => true,
+                    'highlight_expires_at' => now()->addMonth(),
+                ],
+            );
+        }
+
+        $settings = PlatformSetting::current();
+
+        BannerCycle::query()->firstOrCreate(
+            [
+                'state' => 'SP',
+                'city' => 'São Paulo',
+                'title' => 'Ciclo Bimestral • São Paulo/SP',
+            ],
+            [
+                'duration_months' => $settings->banner_cycle_months,
+                'max_slots' => min((int) $settings->banner_max_slots, BannerCycle::HARD_MAX_SLOTS),
+                'price' => $settings->banner_cycle_price,
+                'starts_at' => now()->startOfDay(),
+                'ends_at' => now()->addMonths((int) $settings->banner_cycle_months)->endOfDay(),
+                'is_active' => true,
+            ],
+        );
     }
 }

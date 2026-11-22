@@ -1,7 +1,7 @@
 # Spec 07 — Fornecedor: Portfólio Pago e Sincronização com o Instagram
 
 - **Status:** Ativa
-- **Dependências:** [06-vitrine-regional-destaque-randomico-e-banner-ciclos](06-vitrine-regional-destaque-randomico-e-banner-ciclos.md)
+- **Dependências:** [06-vitrine-regional-destaque-randomico-e-banner-ciclos](../arquivadas/06-vitrine-regional-destaque-randomico-e-banner-ciclos.md)
 
 ## 1. Objetivo
 Transformar o **Portfólio do Fornecedor** em uma funcionalidade paga de alto valor percebido na Vitrine, permitindo que o profissional exiba uma galeria visual de trabalhos realizados com **sincronização automática do feed do Instagram** (além de upload manual).

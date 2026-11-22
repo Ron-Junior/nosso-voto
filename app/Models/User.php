@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'role', 'api_token'])]
+#[Fillable(['name', 'email', 'password', 'role', 'city', 'state', 'api_token'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -40,8 +40,26 @@ class User extends Authenticatable
         static::creating(function (User $user): void {
             $user->role = $user->role ?: self::ROLE_COUPLE;
 
+            if (filled($user->state)) {
+                $user->state = Str::upper(trim($user->state));
+            }
+
+            if (filled($user->city)) {
+                $user->city = trim($user->city);
+            }
+
             if (blank($user->api_token)) {
                 $user->api_token = self::generateUniqueApiToken();
+            }
+        });
+
+        static::updating(function (User $user): void {
+            if (filled($user->state)) {
+                $user->state = Str::upper(trim($user->state));
+            }
+
+            if (filled($user->city)) {
+                $user->city = trim($user->city);
             }
         });
     }
@@ -140,8 +158,8 @@ class User extends Authenticatable
             'user_id' => $this->id,
             'partner_1_name' => $partner1 !== '' ? $partner1 : 'Noivo(a) 1',
             'partner_2_name' => $partner2,
-            'city' => 'São Paulo',
-            'state' => 'SP',
+            'city' => filled($this->city) ? trim((string) $this->city) : 'São Paulo',
+            'state' => filled($this->state) ? Str::upper(trim((string) $this->state)) : 'SP',
             'estimated_budget' => 0,
         ]);
 

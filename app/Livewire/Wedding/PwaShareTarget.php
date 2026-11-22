@@ -4,6 +4,7 @@ namespace App\Livewire\Wedding;
 
 use App\Models\PinterestInspiration;
 use App\Models\User;
+use App\Services\PinterestMetadataResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -33,13 +34,20 @@ class PwaShareTarget extends Component
 
     public ?int $savedInspirationId = null;
 
-    public function mount(?string $title = null, ?string $text = null, ?string $url = null): void
+    public string $resolvedMetadataForUrl = '';
+
+    public function mount(?string $title = null, ?string $text = null, ?string $url = null, ?string $image_url = null): void
     {
         $this->authorizeCoupleAccess();
 
         $this->title = trim((string) ($title ?? request()->query('title', '')));
         $this->text = trim((string) ($text ?? request()->query('text', '')));
         $this->url = trim((string) ($url ?? request()->query('url', '')));
+
+        $incomingImageUrl = trim((string) ($image_url ?? request()->query('image_url', '')));
+        if ($incomingImageUrl !== '' && filter_var($incomingImageUrl, FILTER_VALIDATE_URL) !== false) {
+            $this->image_url = $incomingImageUrl;
+        }
 
         $this->syncUrlFromIncomingShare();
     }
@@ -59,9 +67,15 @@ class PwaShareTarget extends Component
     public function updatedPinterestUrl(string $value): void
     {
         $this->statusMessage = '';
+        $trimmed = trim($value);
 
-        if (filled($value)) {
-            $this->type = PinterestInspiration::inferTypeFromUrl($value);
+        if ($trimmed !== '') {
+            $this->type = PinterestInspiration::inferTypeFromUrl($trimmed);
+
+            if ($trimmed !== $this->resolvedMetadataForUrl) {
+                $this->image_url = null;
+                $this->hydrateMetadataFromPinterestUrl();
+            }
         }
     }
 
@@ -91,6 +105,8 @@ class PwaShareTarget extends Component
 
         if (blank($this->pinterest_url)) {
             $this->syncUrlFromIncomingShare();
+        } elseif (blank($this->image_url) && trim($this->pinterest_url) !== $this->resolvedMetadataForUrl) {
+            $this->hydrateMetadataFromPinterestUrl();
         }
 
         $validated = $this->validate([
@@ -160,6 +176,41 @@ class PwaShareTarget extends Component
             $this->pinterest_url = $extracted;
             $this->type = PinterestInspiration::inferTypeFromUrl($extracted);
         }
+
+        if (blank($this->image_url)) {
+            $embeddedImage = PinterestInspiration::extractImageUrl($this->url, $this->text, $this->title);
+            if ($embeddedImage !== null) {
+                $this->image_url = $embeddedImage;
+            }
+        }
+
+        if (blank($this->image_url) && filled($this->pinterest_url)) {
+            $this->hydrateMetadataFromPinterestUrl();
+        }
+    }
+
+    private function hydrateMetadataFromPinterestUrl(): void
+    {
+        $targetUrl = trim($this->pinterest_url);
+
+        if ($targetUrl === '' || $this->resolvedMetadataForUrl === $targetUrl) {
+            return;
+        }
+
+        $metadata = app(PinterestMetadataResolver::class)->resolve($targetUrl);
+        $this->resolvedMetadataForUrl = $targetUrl;
+
+        if (blank($this->image_url) && filled($metadata['image_url'])) {
+            $this->image_url = $metadata['image_url'];
+        }
+
+        if ((blank($this->title) || trim($this->title) === $targetUrl) && filled($metadata['title'])) {
+            $this->title = $metadata['title'];
+        }
+
+        if (filled($metadata['canonical_url'])) {
+            $this->type = PinterestInspiration::inferTypeFromUrl($metadata['canonical_url']);
+        }
     }
 
     private function notify(string $message): void
@@ -168,4 +219,3 @@ class PwaShareTarget extends Component
         $this->dispatch('toast', message: $message);
     }
 }
-

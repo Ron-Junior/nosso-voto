@@ -28,6 +28,15 @@
             </div>
         @endif
 
+        @if (filled($image_url))
+            <div class="overflow-hidden rounded-2xl border border-[#EAE0DA] bg-[#FBF9F7]">
+                <img src="{{ $image_url }}"
+                     alt="{{ filled($title) ? $title : 'Prévia do Pin' }}"
+                     referrerpolicy="no-referrer"
+                     class="max-h-64 w-full object-cover">
+            </div>
+        @endif
+
         {{-- One-Tap Category Quick Save Buttons --}}
         <div class="space-y-2">
             <p class="text-sm font-medium text-[#2C2523]">
@@ -56,7 +65,7 @@
                 </label>
                 <input id="pwa_pinterest_url"
                        type="url"
-                       wire:model="pinterest_url"
+                       wire:model.live.debounce.400ms="pinterest_url"
                        @input="
                            try {
                                const val = ($el.value || '').trim();
@@ -130,6 +139,20 @@
             </div>
 
             <div>
+                <label for="pwa_image_url" class="block text-sm font-medium text-[#2C2523] mb-1.5">
+                    URL da Imagem de Capa (preenchida automaticamente)
+                </label>
+                <input id="pwa_image_url"
+                       type="url"
+                       wire:model="image_url"
+                       placeholder="https://i.pinimg.com/736x/..."
+                       class="w-full rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-3 min-h-[48px] text-sm text-[#2C2523] focus:border-[#C25E38] focus:bg-[#FFFFFF] focus:outline-none">
+                @error('image_url')
+                    <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
                 <label for="pwa_bride_notes" class="block text-sm font-medium text-[#2C2523] mb-1.5">
                     Observação para o profissional (opcional)
                 </label>
@@ -162,13 +185,21 @@
 
         @if ($savedInspiration !== null)
             <div class="rounded-xl border border-[#5A8F7B]/40 bg-[#EBF3F0] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div class="space-y-0.5 min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[#5A8F7B]">
-                        Último pin salvo • {{ $savedInspiration->categoryLabel() }}
-                    </p>
-                    <p class="text-sm font-semibold text-[#2C2523] truncate">
-                        {{ $savedInspiration->title }}
-                    </p>
+                <div class="flex items-center gap-3 min-w-0">
+                    @if (filled($savedInspiration->image_url))
+                        <img src="{{ $savedInspiration->image_url }}"
+                             alt="{{ $savedInspiration->title }}"
+                             referrerpolicy="no-referrer"
+                             class="h-12 w-12 rounded-xl object-cover border border-[#5A8F7B]/30 shrink-0">
+                    @endif
+                    <div class="space-y-0.5 min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-[#5A8F7B]">
+                            Último pin salvo • {{ $savedInspiration->categoryLabel() }}
+                        </p>
+                        <p class="text-sm font-semibold text-[#2C2523] truncate">
+                            {{ $savedInspiration->title }}
+                        </p>
+                    </div>
                 </div>
 
                 <a href="{{ route('inspirations.index') }}"

@@ -274,6 +274,7 @@
                                 <img src="{{ $inspiration->image_url }}"
                                      alt="{{ $inspiration->title }}"
                                      loading="lazy"
+                                     referrerpolicy="no-referrer"
                                      class="h-full w-full object-cover">
                             </div>
                         @endif

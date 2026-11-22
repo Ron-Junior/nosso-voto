@@ -412,11 +412,19 @@
                     </p>
                 </div>
 
-                <button type="button"
-                        @click="openNewVendor()"
-                        class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer shrink-0">
-                    + Adicionar Fornecedor
-                </button>
+                <div class="flex flex-wrap gap-2.5 shrink-0">
+                    <a href="{{ route('showcase.index') }}"
+                       wire:navigate
+                       class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
+                        Explorar Vitrine
+                    </a>
+
+                    <button type="button"
+                            @click="openNewVendor()"
+                            class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors cursor-pointer shrink-0">
+                        + Adicionar Fornecedor
+                    </button>
+                </div>
             </div>
 
             {{-- Filters --}}
