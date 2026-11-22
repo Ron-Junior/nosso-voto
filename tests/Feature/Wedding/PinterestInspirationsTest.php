@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Wedding;
 use App\Models\WeddingVendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -521,5 +522,37 @@ class PinterestInspirationsTest extends TestCase
             ->assertSee('Salvar Pin do Celular');
         Livewire::test(\App\Livewire\Pinterest\PwaShareTarget::class)
             ->assertSee('Salvar Pin do Celular');
+    }
+
+    public function test_pinterest_board_renders_initial_load_within_three_queries(): void
+    {
+        $couple = User::factory()->couple()->create();
+        $wedding = Wedding::factory()->create(['user_id' => $couple->id]);
+
+        PinterestInspiration::factory()->decoracao()->count(2)->create([
+            'wedding_id' => $wedding->id,
+        ]);
+        PinterestInspiration::factory()->maquiagem()->create([
+            'wedding_id' => $wedding->id,
+        ]);
+
+        $this->actingAs($couple);
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        Livewire::test(PinterestBoard::class)
+            ->assertOk()
+            ->assertViewHas('countsByCategory', [
+                PinterestInspiration::CATEGORY_DECORACAO => 2,
+                PinterestInspiration::CATEGORY_MAQUIAGEM => 1,
+                PinterestInspiration::CATEGORY_PENTEADO => 0,
+            ])
+            ->assertViewHas('totalCount', 3);
+
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $this->assertLessThanOrEqual(3, count($queries));
     }
 }

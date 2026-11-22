@@ -40,13 +40,13 @@
 
                 @if (request()->routeIs('login'))
                     <a href="{{ route('register') }}"
-                       wire:navigate.hover
+                       wire:navigate
                        class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors">
                         Criar Conta
                     </a>
                 @elseif (request()->routeIs('register'))
                     <a href="{{ route('login') }}"
-                       wire:navigate.hover
+                       wire:navigate
                        class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FFFFFF] px-4 py-2 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
                         Entrar
                     </a>

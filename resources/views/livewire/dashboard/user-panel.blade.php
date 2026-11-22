@@ -122,7 +122,7 @@
                     </button>
 
                     <a href="{{ route('vendor.schedule') }}"
-                       wire:navigate.hover
+                       wire:navigate
                        class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors">
                         Abrir Agenda de Noivos
                     </a>
@@ -130,7 +130,7 @@
 
                 @if ($user->isAdmin())
                     <a href="{{ route('admin.settings') }}"
-                       wire:navigate.hover
+                       wire:navigate
                        class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors shrink-0">
                         Abrir Configurações Globais
                     </a>
@@ -213,7 +213,7 @@
                                 @endif
 
                                 <a href="{{ route('vendor.wedding.access', $linkedVendor->invite_token) }}"
-                                   wire:navigate.hover
+                                   wire:navigate
                                    class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-white hover:bg-[#A84D2B] transition-colors shrink-0">
                                     {{ $linkedVendor->isCerimonialista() ? 'Abrir Painel Consolidado' : 'Acessar Casamento' }}
                                 </a>
@@ -240,7 +240,7 @@
                 </div>
 
                 <a href="{{ route('vendor.schedule') }}"
-                   wire:navigate.hover
+                   wire:navigate
                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
                     Gerenciar na Agenda
                 </a>

@@ -132,7 +132,7 @@
 
         <p class="text-center text-sm text-[#6E625F]">
             Já possui uma conta?
-            <a href="{{ route('login') }}" wire:navigate.hover class="font-semibold text-[#C25E38] hover:text-[#A84D2B] underline underline-offset-4">
+            <a href="{{ route('login') }}" wire:navigate class="font-semibold text-[#C25E38] hover:text-[#A84D2B] underline underline-offset-4">
                 Entrar agora
             </a>
         </p>

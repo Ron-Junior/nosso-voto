@@ -153,7 +153,7 @@
                 </button>
 
                 <a href="{{ route('inspirations.index') }}"
-                   wire:navigate.hover
+                   wire:navigate
                    class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-5 py-3 min-h-[48px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
                     Ver Moodboard
                 </a>
@@ -172,7 +172,7 @@
                 </div>
 
                 <a href="{{ route('inspirations.index') }}"
-                   wire:navigate.hover
+                   wire:navigate
                    class="inline-flex items-center justify-center rounded-xl bg-[#5A8F7B] px-4 py-2 min-h-[44px] text-xs font-semibold text-white shrink-0">
                     Abrir Moodboard
                 </a>

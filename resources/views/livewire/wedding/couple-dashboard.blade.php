@@ -275,7 +275,7 @@
 
                 <div class="flex flex-col sm:flex-row gap-2.5 shrink-0">
                     <a href="{{ route('inspirations.index') }}"
-                       wire:navigate.hover
+                       wire:navigate
                        class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
                         Inspirações Pinterest
                     </a>

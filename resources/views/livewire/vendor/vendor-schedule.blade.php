@@ -67,7 +67,7 @@
 
             <div class="flex flex-col sm:flex-row flex-wrap gap-2.5 shrink-0">
                 <a href="{{ route('vendor.dashboard') }}"
-                   wire:navigate.hover
+                   wire:navigate
                    class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
                     Voltar ao Painel
                 </a>
@@ -286,7 +286,7 @@
 
                                 @if ($entry->isPlatformCouple())
                                     <a href="{{ route('vendor.wedding.access', $entry->invite_token) }}"
-                                       wire:navigate.hover
+                                       wire:navigate
                                        class="inline-flex items-center justify-center rounded-xl bg-[#C25E38] px-3.5 py-2 min-h-[44px] text-xs font-semibold text-white hover:bg-[#A84D2B] transition-colors">
                                         {{ $entry->isCerimonialista() ? 'Painel Consolidado' : 'Ver Casamento' }}
                                     </a>

@@ -252,25 +252,17 @@ class PinterestBoard extends Component
         $totalCount = 0;
 
         if ($wedding !== null) {
-            $groupedCounts = $wedding->pinterestInspirations()
-                ->selectRaw('category, COUNT(*) as total')
-                ->groupBy('category')
-                ->pluck('total', 'category');
-
-            foreach (PinterestInspiration::CATEGORIES as $cat) {
-                $countsByCategory[$cat] = (int) ($groupedCounts[$cat] ?? 0);
-            }
-
-            $totalCount = array_sum($countsByCategory);
-
             $query = $wedding->pinterestInspirations()->latest('id');
+            $hasFilters = false;
 
             if ($this->activeCategory !== 'all' && in_array($this->activeCategory, PinterestInspiration::CATEGORIES, true)) {
                 $query->where('category', $this->activeCategory);
+                $hasFilters = true;
             }
 
             if ($this->typeFilter !== 'all' && in_array($this->typeFilter, PinterestInspiration::TYPES, true)) {
                 $query->where('type', $this->typeFilter);
+                $hasFilters = true;
             }
 
             if (filled($this->search)) {
@@ -280,9 +272,31 @@ class PinterestBoard extends Component
                         ->orWhereLike('bride_notes', $term, caseSensitive: false)
                         ->orWhereLike('pinterest_url', $term, caseSensitive: false);
                 });
+                $hasFilters = true;
             }
 
             $inspirations = $query->get();
+
+            if (! $hasFilters) {
+                foreach ($inspirations as $item) {
+                    if (isset($countsByCategory[$item->category])) {
+                        $countsByCategory[$item->category]++;
+                    }
+                }
+
+                $totalCount = $inspirations->count();
+            } else {
+                $groupedCounts = $wedding->pinterestInspirations()
+                    ->selectRaw('category, COUNT(*) as total')
+                    ->groupBy('category')
+                    ->pluck('total', 'category');
+
+                foreach (PinterestInspiration::CATEGORIES as $cat) {
+                    $countsByCategory[$cat] = (int) ($groupedCounts[$cat] ?? 0);
+                }
+
+                $totalCount = array_sum($countsByCategory);
+            }
 
             $specialtyVendors = $wedding->vendors()
                 ->whereIn('category', [
@@ -305,7 +319,7 @@ class PinterestBoard extends Component
             'categoryLabels' => PinterestInspiration::categoryLabels(),
             'typeLabels' => PinterestInspiration::typeLabels(),
             'sourceLabels' => PinterestInspiration::sourceLabels(),
-            'settings' => PlatformSetting::current(),
+            'settings' => $specialtyVendors->isNotEmpty() ? PlatformSetting::current() : null,
             'clipEndpointUrl' => url('/api/v1/inspirations/clip'),
             'vendorCategoryLabels' => WeddingVendor::categoryLabels(),
         ]);
@@ -359,4 +373,3 @@ class PinterestBoard extends Component
         $this->dispatch('toast', message: $message);
     }
 }
-

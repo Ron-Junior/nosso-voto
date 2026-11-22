@@ -64,7 +64,7 @@
 
         <p class="text-center text-sm text-[#6E625F]">
             Ainda não tem conta?
-            <a href="{{ route('register') }}" wire:navigate.hover class="font-semibold text-[#C25E38] hover:text-[#A84D2B] underline underline-offset-4">
+            <a href="{{ route('register') }}" wire:navigate class="font-semibold text-[#C25E38] hover:text-[#A84D2B] underline underline-offset-4">
                 Criar conta agora
             </a>
         </p>

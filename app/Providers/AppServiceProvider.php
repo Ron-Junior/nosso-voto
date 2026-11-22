@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\RequestTiming;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(RequestTiming::class);
     }
 
     /**
@@ -19,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        DB::listen(function (QueryExecuted $query): void {
+            app(RequestTiming::class)->recordQuery($query->time);
+        });
     }
 }

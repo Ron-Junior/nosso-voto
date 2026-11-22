@@ -40,12 +40,12 @@
 
             <div class="flex flex-col sm:flex-row gap-2.5 shrink-0">
                 <a href="{{ route('inspirations.pwa-share') }}"
-                   wire:navigate.hover
+                   wire:navigate
                    class="inline-flex items-center justify-center rounded-xl border border-[#C25E38] bg-[#F9EBE6] px-4 py-2.5 min-h-[44px] text-sm font-semibold text-[#C25E38] hover:bg-[#C25E38] hover:text-white transition-colors">
                     Captura Rápida (PWA)
                 </a>
                 <a href="{{ route('dashboard') }}"
-                   wire:navigate.hover
+                   wire:navigate
                    class="inline-flex items-center justify-center rounded-xl border border-[#EAE0DA] bg-[#FBF9F7] px-4 py-2.5 min-h-[44px] text-sm font-medium text-[#2C2523] hover:border-[#C25E38] hover:text-[#C25E38] transition-colors">
                     Voltar ao Painel
                 </a>
@@ -359,7 +359,7 @@
 
         @if ($specialtyVendors->isEmpty())
             <div class="rounded-xl border border-dashed border-[#EAE0DA] bg-[#FBF9F7] p-5 text-sm text-[#6E625F]">
-                Cadastre um fornecedor nas categorias <strong class="font-medium text-[#2C2523]">Decoração</strong>, <strong class="font-medium text-[#2C2523]">Maquiagem</strong> ou <strong class="font-medium text-[#2C2523]">Penteado</strong> no <a href="{{ route('dashboard') }}" wire:navigate.hover class="font-semibold text-[#C25E38] underline">Painel dos Noivos</a> para gerar o link exclusivo do moodboard.
+                Cadastre um fornecedor nas categorias <strong class="font-medium text-[#2C2523]">Decoração</strong>, <strong class="font-medium text-[#2C2523]">Maquiagem</strong> ou <strong class="font-medium text-[#2C2523]">Penteado</strong> no <a href="{{ route('dashboard') }}" wire:navigate class="font-semibold text-[#C25E38] underline">Painel dos Noivos</a> para gerar o link exclusivo do moodboard.
             </div>
         @else
             <div class="space-y-3">
@@ -374,7 +374,7 @@
                                 <span class="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold {{ $vendor->is_pinterest_authorized ? 'bg-[#EBF3F0] text-[#5A8F7B]' : 'bg-[#F9EBE6] text-[#C25E38]' }}">
                                     {{ $vendor->is_pinterest_authorized ? 'Acesso autorizado pelo casal' : 'Acesso pausado pelo casal' }}
                                 </span>
-                                @if ($settings->paywall_pinterest_inspirations_enabled)
+                                @if ($settings?->paywall_pinterest_inspirations_enabled)
                                     <span class="inline-flex items-center rounded-lg bg-[#FFFFFF] border border-[#EAE0DA] px-2.5 py-1 text-xs font-medium text-[#6E625F]">
                                         {{ $vendor->has_paid_pinterest_unlock ? 'Desbloqueio pago ativo' : 'Paywall ativo para desbloqueio' }}
                                     </span>

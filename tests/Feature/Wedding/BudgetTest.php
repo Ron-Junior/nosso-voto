@@ -384,4 +384,21 @@ class BudgetTest extends TestCase
 
         $this->assertLessThanOrEqual(4, count($queries));
     }
+
+    public function test_couple_dashboard_response_includes_server_timing_header(): void
+    {
+        $couple = User::factory()->couple()->create();
+        Wedding::factory()->create(['user_id' => $couple->id]);
+
+        $response = $this->actingAs($couple)->get('/painel');
+
+        $response->assertOk();
+
+        $timing = (string) $response->headers->get('Server-Timing');
+
+        $this->assertStringContainsString('boot;dur=', $timing);
+        $this->assertStringContainsString('db;dur=', $timing);
+        $this->assertStringContainsString('app;dur=', $timing);
+        $this->assertStringContainsString('runtime;desc="cfg:', $timing);
+    }
 }

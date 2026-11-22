@@ -7,6 +7,8 @@ use App\Models\PlatformSetting;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -98,5 +100,47 @@ class PlatformSettingsTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'noivos@nossovoto.com.br', 'role' => User::ROLE_COUPLE]);
         $this->assertDatabaseHas('users', ['email' => 'fornecedor@nossovoto.com.br', 'role' => User::ROLE_VENDOR]);
         $this->assertDatabaseHas('users', ['email' => 'admin@nossovoto.com.br', 'role' => User::ROLE_ADMIN]);
+    }
+
+    public function test_platform_setting_current_caches_per_request_and_invalidates_on_update(): void
+    {
+        DB::table('platform_settings')->insert([
+            'paywall_pinterest_inspirations_enabled' => false,
+            'platform_gift_fee_percent' => 4.99,
+            'regional_highlight_monthly_price' => 69.90,
+            'portfolio_monthly_price' => 39.90,
+            'banner_cycle_months' => 2,
+            'banner_max_slots' => 5,
+            'banner_cycle_price' => 149.90,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        $first = PlatformSetting::current();
+        $second = PlatformSetting::current();
+        $third = PlatformSetting::current();
+
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $this->assertCount(1, $queries);
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame($first->id, $third->id);
+
+        $cachedPayload = Cache::memo()->get('nossovoto.platform_setting.current');
+        $this->assertIsArray($cachedPayload);
+        $this->assertSame(
+            $cachedPayload,
+            unserialize(serialize($cachedPayload), ['allowed_classes' => false]),
+        );
+
+        $first->update(['platform_gift_fee_percent' => '6.50']);
+
+        $this->app->forgetScopedInstances();
+
+        $this->assertSame('6.50', (string) PlatformSetting::current()->platform_gift_fee_percent);
     }
 }
